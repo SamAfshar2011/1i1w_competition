@@ -205,6 +205,10 @@ Artificial Intelligence Developer
 
 # 📜 License
 
-This project is released for educational and research purposes.
+This project is licensed under the **Apache License 2.0**.
 
-Please refer to the repository license for usage terms.
+Copyright © 2026 Sam
+
+You may use, modify, and distribute this software in compliance with the terms of the Apache License 2.0.
+
+See the [LICENSE](LICENSE) file for the complete license text.
