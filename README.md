@@ -203,12 +203,16 @@ Artificial Intelligence Developer
 
 ---
 
-# 📜 License
+## 📜 License
 
-This project is licensed under the **Apache License 2.0**.
+This project is proprietary software.
 
-Copyright © 2026 Sam
+**Copyright © 2026 Sam. All Rights Reserved.**
 
-You may use, modify, and distribute this software in compliance with the terms of the Apache License 2.0.
+This repository is made available solely for portfolio, demonstration, evaluation, and competition purposes.
 
-See the [LICENSE](LICENSE) file for the complete license text.
+No permission is granted to use, execute, copy, modify, reverse engineer, distribute, sublicense, host, commercialize, or create derivative works from this software without the prior written permission of the copyright holder.
+
+The source code, algorithms, software architecture, user interface, documentation, models, prompts, assets, and all original project materials are protected by copyright and other applicable intellectual property laws.
+
+See the `LICENSE` file for the complete license terms.
