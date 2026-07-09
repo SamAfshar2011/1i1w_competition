@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anka Seismic Predictor</title>
+    <link rel="icon" href="logo%202.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Simulation Button (Top-Left) -->
+    <a href="simulation.html" class="sim-link-btn" id="simulationBtn" data-i18n-title="sim_button_title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+            <line x1="8" y1="2" x2="8" y2="18"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
+        <span class="sim-text" data-i18n="sim_button_text">Earthquake Simulator</span>
+    </a>
+
+    <!-- دکمه ورود به صفحه اعتبارسنجی PDF -->
+    <a href="pdf.html" class="sim-link-btn secondary-link" id="verifyBtn" data-i18n-title="verify_button_title">
+        <!-- آیکون سپر تیک‌دار یونیک -->
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="M9 12l2 2 4-4"></path>
+        </svg>
+        <span class="sim-text" data-i18n="verify_button_text">Verify Report</span>
+    </a>
+
+    <!-- Earthquake Simulator Intro Tooltip -->
+    <div id="simIntroOverlay" class="sim-intro-overlay" aria-hidden="true">
+    <div class="sim-intro-arrow-wrap">
+        <div class="sim-intro-arrow"></div>
+    </div>
+
+    <div class="sim-intro-panel" id="simIntroPanel">
+        <button class="sim-intro-close" id="simIntroClose" aria-label="Close">×</button>
+        <div class="sim-intro-badge" id="simIntroBadge">جدید</div>
+        <h3 class="sim-intro-title" id="simIntroTitle">شبیه‌ساز زلزله چیست؟</h3>
+        <p class="sim-intro-text" id="simIntroText">
+        این بخش یک شبیه‌ساز دو‌بعدی زلزله است. شما اطلاعات ساختمان را وارد می‌کنید و سامانه نشان می‌دهد اگر ساختمانی با همین مشخصات در دنیای واقعی در معرض زلزله‌ای با شدت مشخص قرار بگیرد، چه رفتاری از خود نشان می‌دهد و میزان آسیب احتمالی آن چگونه خواهد بود.
+        </p>
+        <div class="sim-intro-tip" id="simIntroTip">
+        برای شروع، روی دکمه شبیه‌ساز زلزله بزنید.
+        </div>
+    </div>
+    </div>
+
+    <!-- Settings Button -->
+    <div class="glass-panel settings-btn" onclick="toggleSettings()">
+        <svg viewBox="0 0 24 24">
+            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+        </svg>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="glass-panel settings-panel" id="settingsPanel">
+        <h3 data-i18n="settings_title">Settings</h3>
+        
+        <div class="settings-group">
+            <label data-i18n="lang_label">Language / زبان / Dil</label>
+            <select id="langSelect" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="fa">فارسی</option>
+                <option value="tr">Türkçe</option>
+            </select>
+        </div>
+
+        <div class="settings-group">
+            <label data-i18n="primary_color">Primary Color</label>
+            <input type="color" id="primaryColorPicker" value="#1d4ed8" onchange="updateColors()">
+        </div>
+
+        <div class="settings-group">
+            <label data-i18n="accent_color">Accent Color</label>
+            <input type="color" id="accentColorPicker" value="#00ffcc" onchange="updateColors()">
+        </div>
+
+        <div class="settings-group">
+            <label data-i18n="bg_color">Background Color</label>
+            <input type="color" id="bgColorPicker" value="#0f172a" onchange="updateColors()">
+        </div>
+    </div>
+
+    <div class="glass-panel container">
+        <h1 data-i18n="app_title">Anka Collapse Predictor</h1>
+        
+        <form id="predictForm" class="form-grid">
+            
+            <div class="input-group">
+                <label data-i18n="shear_wall">Shear Wall</label>
+                <select id="Shear_wall" required>
+                    <option value="yes" data-i18n="yes">Yes</option>
+                    <option value="no" data-i18n="no">No</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="floors">Number of Floors</label>
+                <input type="number" id="floors" value="6" min="1" max="100" required>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="age">Building Age (Years)</label>
+                <input type="number" id="building_age" value="13" min="1" max="1000" step="1" required>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="area">Area (sqm)</label>
+                <input type="number" id="area" value="210" min="40" max="2000" required>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="magnitude">Expected Earthquake Mag</label>
+                <input type="number" step="0.1" id="earthquake_magnitude" value="7.2" min="1" max="9" required>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="liq_risk">Soil Liquefaction Risk</label>
+                <select id="soil_liquefaction_risk" required>
+                    <option value="low" data-i18n="low">Low</option>
+                    <option value="medium" data-i18n="medium">Medium</option>
+                    <option value="high" data-i18n="high">High</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="struct_type">Structure Type</label>
+                <select id="structure_type" required>
+                    <option value="concrete" data-i18n="concrete">Concrete</option>
+                    <option value="steel" data-i18n="steel">Steel</option>
+                    <option value="masnory" data-i18n="masonry">Masonry</option>
+                    <option value="wood" data-i18n="wood">Wood</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="soil_type">Soil Type</label>
+                <select id="soil_type" required>
+                    <option value="rock" data-i18n="rock">Rock</option>
+                    <option value="gravel" data-i18n="gravel">Gravel</option>
+                    <option value="sand" data-i18n="sand">Sand</option>
+                    <option value="clay" data-i18n="clay">Clay</option>
+                    <option value="soft_soil" data-i18n="soft_soil">Soft Soil</option>
+                </select>
+            </div>
+
+            <div class="future-box">
+                <div class="input-group">
+                    <label data-i18n="future_q">Predict for future years?</label>
+                    <select id="futureToggle" onchange="toggleFutureInput()">
+                        <option value="no" data-i18n="no">No</option>
+                        <option value="yes" data-i18n="yes">Yes</option>
+                    </select>
+                </div>
+                <div class="input-group" id="futureInputDiv" style="display:none; margin-top:15px;">
+                    <label data-i18n="future_years">How many years ahead? (1-20)</label>
+                    <input type="number" id="future_years" value="0" min="1" max="20">
+                </div>
+            </div>
+
+            <button type="button" class="btn full-width" id="predictBtn" onclick="runValidation()" data-i18n="predict_btn">
+                Predict & Analyze 🚀
+            </button>
+        </form>
+
+        <!-- Result Section -->
+        <div id="resultBox" class="glass-panel result-panel">
+            <h2 data-i18n="result_title">Collapse Probability</h2>
+            <div id="probValue" class="prob-value">0%</div>
+            <div id="recommendationsList" class="recommendations"></div>
+            <div id="pdfInfo" class="pdf-info"></div>
+
+            <button class="btn ai-chat-btn" data-i18n="chat_with_ai" onclick="openAIChat()">
+                Chat with AI Assistant
+            </button>
+        </div>
+    </div>
+    <script>
+        // 1. i18n Dictionary
+        const dict = {
+            en: {
+                app_title: "Anka Collapse Predictor",
+                settings_title: "Settings",
+                lang_label: "Language",
+                primary_color: "Primary Color",
+                bg_color: "Background Color",
+                accent_color: "Accent Color",
+                shear_wall: "Shear Wall",
+                floors: "Number of Floors",
+                age: "Building Age (Years)",
+                area: "Area (sqm)",
+                magnitude: "Expected Earthquake Mag",
+                liq_risk: "Soil Liquefaction Risk",
+                struct_type: "Structure Type",
+                soil_type: "Soil Type",
+                future_q: "Predict for future years?",
+                no: "No", yes: "Yes",
+                future_years: "How many years ahead? (1-20)",
+                predict_btn: "Predict & Analyze 🚀",
+                result_title: "Collapse Probability",
+                low: "Low", medium: "Medium", high: "High",
+                concrete: "Concrete", steel: "Steel", masonry: "Masonry", wood: "Wood",
+                rock: "Rock", gravel: "Gravel", sand: "Sand", clay: "Clay", soft_soil: "Soft Soil",
+                download_btn: "📥 Download Report:",
+                validation_empty: "Please fill out this field.",
+                validation_range: "Value must be between {min} and {max}.",
+                chat_with_ai: "🤖 Chat with AI Assistant",
+                sim_button_text: "Earthquake Simulator",
+                sim_button_title: "Earthquake Simulator",
+                sim_intro_title: "Try the Earthquake Simulator",
+                sim_intro_desc: "This feature is a 2D earthquake simulator. You enter your building information, and the system visualizes what could happen if a real building with these specifications experienced an earthquake of the selected magnitude.",
+                sim_intro_close: "Got it",
+                verify_button_text: "Verify Report",
+                verify_button_title: "Verify PDF Report Authenticity",
+            },
+            fa: {
+                app_title: "پیش‌بینی ریزش Anka",
+                settings_title: "تنظیمات",
+                lang_label: "زبان",
+                primary_color: "رنگ اصلی",
+                bg_color: "رنگ پس‌زمینه",
+                accent_color: "رنگ تأکیدی",
+                shear_wall: "دیوار برشی",
+                floors: "تعداد طبقات",
+                age: "سن ساختمان (سال)",
+                area: "مساحت (مترمربع)",
+                magnitude: "بزرگی زلزله احتمالی",
+                liq_risk: "خطر روانگرایی خاک",
+                struct_type: "نوع سازه",
+                soil_type: "نوع خاک",
+                future_q: "پیش‌بینی برای سال‌های آینده؟",
+                no: "خیر", yes: "بله",
+                future_years: "چند سال آینده؟ (۱ تا ۲۰)",
+                predict_btn: "پیش‌بینی و تحلیل 🚀",
+                result_title: "احتمال ریزش",
+                low: "کم", medium: "متوسط", high: "زیاد",
+                concrete: "بتنی", steel: "فولادی", masonry: "مصالح سنتی", wood: "چوبی",
+                rock: "سنگ", gravel: "شن", sand: "ماسه", clay: "رس", soft_soil: "خاک نرم",
+                download_btn: "📥 دانلود گزارش:",
+                validation_empty: "لطفاً این فیلد را پر کنید.",
+                validation_range: "مقدار باید بین {min} تا {max} باشد.",
+                chat_with_ai: "🤖 گفتگو با هوش مصنوعی",
+                sim_button_text: "شبیه‌ساز زلزله",
+                sim_button_title: "شبیه‌ساز زلزله",
+                sim_intro_title: "شبیه‌ساز زلزله را امتحان کنید",
+                sim_intro_desc: "این قابلیت یک شبیه‌ساز دو‌بعدی زلزله است. شما اطلاعات ساختمان را وارد می‌کنید و سیستم نشان می‌دهد اگر ساختمانی واقعی با همین مشخصات در معرض زلزله‌ای با بزرگی انتخاب‌شده قرار بگیرد، چه اتفاقی ممکن است برای آن رخ دهد.",
+                sim_intro_close: "متوجه شدم",
+                verify_button_text: "اعتبارسنجی گزارش",
+                verify_button_title: "بررسی اصالت گزارش‌های PDF"
+            },
+            tr: {
+                app_title: "Anka Çökme Tahmincisi",
+                settings_title: "Ayarlar",
+                lang_label: "Dil",
+                primary_color: "Ana Renk",
+                bg_color: "Arka Plan Rengi",
+                accent_color: "Vurgu Rengi",
+                shear_wall: "Kesme Duvarı",
+                floors: "Kat Sayısı",
+                age: "Bina Yaşı (Yıl)",
+                area: "Alan (m²)",
+                magnitude: "Beklenen Deprem Büyüklüğü",
+                liq_risk: "Zemin Sıvılaşma Riski",
+                struct_type: "Yapı Türü",
+                soil_type: "Zemin Türü",
+                future_q: "Gelecek yıllar için tahmin yapılsın mı?",
+                no: "Hayır", yes: "Evet",
+                future_years: "Kaç yıl ileri? (1-20)",
+                predict_btn: "Tahmin Et ve Analiz Et 🚀",
+                result_title: "Çökme Olasılığı",
+                low: "Düşük", medium: "Orta", high: "Yüksek",
+                concrete: "Betonarme", steel: "Çelik", masonry: "Yığma", wood: "Ahşap",
+                rock: "Kaya", gravel: "Çakıl", sand: "Kum", clay: "Kil", soft_soil: "Yumuşak Zemin",
+                download_btn: "📥 Raporu İndir:",
+                validation_empty: "Lütfen bu alanı doldurun.",
+                validation_range: "{min} ile {max} arasında bir değer giriniz.",
+                chat_with_ai: "🤖 Yapay Zeka ile Sohbet",
+                sim_button_text: "Deprem Simülatörü",
+                sim_button_title: "Deprem Simülatörü",
+                sim_intro_title: "Deprem Simülatörünü Deneyin",
+                sim_intro_desc: "Bu özellik 2 boyutlu bir deprem simülatörüdür. Bina bilgilerinizi girersiniz ve sistem, bu özelliklere sahip gerçek bir bina seçilen büyüklükte bir deprem yaşarsa neler olabileceğini görselleştirir.",
+                sim_intro_close: "Anladım",
+                verify_button_text: "Raporu Doğrula",
+                verify_button_title: "PDF Raporunun Gerçekliğini Doğrula"
+            }
+        };
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
+        function hexToRgb(hex) {
+            const clean = (hex || "#00ffcc").replace("#", "").trim();
+            const full = clean.length === 3 ? clean.split("").map(ch => ch + ch).join("") : clean;
+            const bigint = parseInt(full, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return `${r}, ${g}, ${b}`;
+        }
+
+        function updateColors() {
+            const bg = document.getElementById('bgColorPicker').value;
+            const primary = document.getElementById('primaryColorPicker').value;
+            const accent = document.getElementById('accentColorPicker').value;
+
+            document.documentElement.style.setProperty('--bg-color', bg);
+            document.documentElement.style.setProperty('--primary-color', primary);
+            document.documentElement.style.setProperty('--secondary-color', accent);
+            document.documentElement.style.setProperty('--accent', accent);
+            document.documentElement.style.setProperty('--primary-rgb', hexToRgb(primary));
+            document.documentElement.style.setProperty('--accent-rgb', hexToRgb(accent));
+
+            localStorage.setItem('bgColor', bg);
+            localStorage.setItem('primaryColor', primary);
+            localStorage.setItem('accentColor', accent);
+        }
+
+        function loadStoredSettings() {
+            const storedLang = localStorage.getItem('selectedLang') || localStorage.getItem('lang') || 'en';
+            const storedBg = localStorage.getItem('bgColor') || '#0f172a';
+            const storedPrimary = localStorage.getItem('primaryColor') || '#1d4ed8';
+            const storedAccent = localStorage.getItem('accentColor') || '#00ffcc';
+
+            document.getElementById('langSelect').value = storedLang;
+            document.getElementById('bgColorPicker').value = storedBg;
+            document.getElementById('primaryColorPicker').value = storedPrimary;
+            document.getElementById('accentColorPicker').value = storedAccent;
+
+            updateColors();
+            changeLanguage();
+        }
+
+
+        function toggleFutureInput() {
+            const val = document.getElementById('futureToggle').value;
+            const div = document.getElementById('futureInputDiv');
+            if(val === 'yes') {
+                div.style.display = 'flex';
+                // Trigger reflow for animation
+                setTimeout(() => div.style.opacity = 1, 10);
+            } else {
+                div.style.display = 'none';
+                document.getElementById('future_years').value = 0;
+            }
+        }
+
+        function changeLanguage() {
+            const lang = document.getElementById('langSelect').value;
+            const elements = document.querySelectorAll('[data-i18n]');
+            
+            // RTL support for Farsi
+            const isRTL = lang === 'fa';
+            document.documentElement.lang = lang;
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+            document.body.dir = isRTL ? 'rtl' : 'ltr';
+
+            elements.forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                // Smooth fade animation
+                el.classList.remove('fade-text');
+                void el.offsetWidth; // trigger reflow
+                el.classList.add('fade-text');
+                
+                setTimeout(() => {
+                    if (!dict[lang][key]) return;
+                    if (el.tagName === 'OPTION') {
+                        el.text = dict[lang][key];
+                    } else {
+                        el.innerHTML = dict[lang][key];
+                    }
+                }, 300); // change halfway through animation
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (dict[lang][key]) el.setAttribute('title', dict[lang][key]);
+            });
+            document.querySelectorAll('.validation-tooltip').forEach(t => t.remove());
+            localStorage.setItem('selectedLang', lang);
+            localStorage.setItem('lang', lang);
+        }
+
+        async function makePrediction() {
+            const btn = document.getElementById('predictBtn');
+            btn.innerHTML = "Processing... ⏳";
+            
+            const payload = {
+                Shear_wall: document.getElementById('Shear_wall').value,
+                floors: document.getElementById('floors').value,
+                building_age: document.getElementById('building_age').value,
+                area: document.getElementById('area').value,
+                earthquake_magnitude: document.getElementById('earthquake_magnitude').value,
+                soil_liquefaction_risk: document.getElementById('soil_liquefaction_risk').value,
+                structure_type: document.getElementById('structure_type').value,
+                soil_type: document.getElementById('soil_type').value,
+                future_years: document.getElementById('futureToggle').value === 'yes' ? document.getElementById('future_years').value : 0,
+                lang: document.getElementById('langSelect').value
+            };
+
+            try {
+                // Fetch from our Python backend!
+                const res = await fetch('http://localhost:5070/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                
+                showResult(data.probability, data.color, data.recommendations, data.pdf_file);
+            } catch (err) {
+                console.error(err);
+                alert("Backend is offline! Did you run server.ipynb? 😉");
+            } finally {
+                const lang = document.getElementById('langSelect').value;
+                btn.innerHTML = dict[lang]['predict_btn'];
+            }
+        }
+
+        function showResult(prob, color, recs, pdfFile) {
+            const panel = document.getElementById('resultBox');
+            const probEl = document.getElementById('probValue');
+            const recsEl = document.getElementById('recommendationsList');
+            const pdfEl = document.getElementById('pdfInfo');
+
+            // Reset animation
+            panel.classList.remove('active');
+            void panel.offsetWidth;
+
+            // Setup values
+            probEl.style.color = color;
+            panel.style.border = `1px solid ${color}`;
+            panel.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}40, inset 0 0 15px ${color}10`;
+
+            const lang = document.getElementById('langSelect').value;
+            const safeRecText = lang === 'fa' ? 'توصیه‌های ایمنی:' : (lang === 'tr' ? 'Güvenlik Önerileri:' : 'Safety Recommendations:');
+            recsEl.innerHTML = `<strong>${safeRecText}</strong><br><br>` + recs.map(r => `➡️ ${r}`).join('<br><br>');
+
+
+            const downloadText = dict[lang]['download_btn'];
+            pdfEl.innerHTML = `<a href="http://localhost:5070/download/${pdfFile}" target="_blank" class="btn download-report-btn">${downloadText} ${pdfFile}</a>`;
+
+            // Trigger Big Bang
+            panel.classList.add('active');
+
+            setTimeout(() => {
+                panel.style.boxShadow = `0 0 50px ${color}, 0 0 20px ${color}80`;
+            }, 1200)
+
+            // Number Counter Animation
+            let start = 0;
+            const end = prob;
+            const duration = 1500;
+            if (end <= 0) {
+                probEl.innerText = '0.00%';
+                return;
+            }
+
+            const stepTime = Math.max(16, Math.abs(Math.floor(duration / end)));
+
+            const timer = setInterval(() => {
+                start += 1;
+                if (start >= end) {
+                    start = end;
+                    clearInterval(timer);
+                    // بعد از تموم شدن انیمیشن، border و shadow رو دوباره set کن
+                    panel.style.border = `1px solid ${color}`;
+                    panel.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}40, inset 0 0 15px ${color}10`;
+                }
+                probEl.innerText = `${start.toFixed(2)}%`;
+            }, stepTime);
+        }
+    </script>
+    <script>
+        function onlyInteger(e) {
+            if (e.key === '.' || e.key === '-' || e.key === 'e') {
+                e.preventDefault();
+            }
+        }
+        function noNegative(e) {
+            if (e.key === '-') {
+                e.preventDefault();
+            }
+        }
+        
+        document.getElementById('floors').addEventListener('keydown', onlyInteger);
+        document.getElementById('building_age').addEventListener('keydown', onlyInteger);
+        document.getElementById('area').addEventListener('keydown', onlyInteger);
+
+        document.getElementById('earthquake_magnitude').addEventListener('keydown', noNegative);
+    </script>
+    <script>
+    function showTooltip(input, message) {
+        removeTooltip(input);
+
+        const tooltip = document.createElement('div');
+        tooltip.className = 'validation-tooltip';
+        tooltip.innerText = message;
+
+        const rect = input.getBoundingClientRect();
+        tooltip.style.top = (window.scrollY + rect.top - 45) + 'px';
+        tooltip.style.left = (window.scrollX + rect.left) + 'px';
+
+        document.body.appendChild(tooltip);
+        input._tooltip = tooltip;
+    }
+
+    function removeTooltip(input) {
+        if (input._tooltip) {
+            input._tooltip.remove();
+            input._tooltip = null;
+        }
+    }
+
+    function validateField(input, min, max, emptyMsg, rangeMsg) {
+        if (input.value === '') {
+            showTooltip(input, emptyMsg);
+            return false;
+        }
+
+        const num = Number(input.value);
+        if (num < min || num > max) {
+            showTooltip(
+                input,
+                rangeMsg.replace('{min}', min).replace('{max}', max)
+            );
+            return false;
+        }
+
+        removeTooltip(input);
+        return true;
+    }
+    </script>
+    <script>
+    function t(key) {
+        const lang = document.getElementById('langSelect')?.value || document.documentElement.lang || "en";
+
+        return dict?.[lang]?.[key]
+            || dict?.en?.[key]
+            || "";
+    }
+    </script>
+    <script>
+    function runValidation() {
+        
+        const floors = document.getElementById('floors');
+        const building_age = document.getElementById('building_age');
+        const area = document.getElementById('area');
+        const earthquake_magnitude = document.getElementById('earthquake_magnitude');
+
+        const texts = {
+            fillField: t("validation_empty"),
+            range: t("validation_range")
+        };
+
+        const ok =
+            validateField(floors, 1, 100, texts.fillField, texts.range) &&
+            validateField(building_age, 1, 1000, texts.fillField, texts.range) &&
+            validateField(area, 40, 2000, texts.fillField, texts.range) &&
+            validateField(earthquake_magnitude, 1, 9, texts.fillField, texts.range);
+
+        if (!ok) return;
+
+        // ✅ فقط اگر همه چیز درست بود، برنامه اصلی اجرا می‌شود
+        makePrediction(); 
+    }
+    </script>
+    <script>
+        function openAIChat() {
+        const buildingData = {
+            Shear_wall: document.getElementById('Shear_wall').value,
+            floors: parseInt(document.getElementById('floors').value),
+            building_age: parseInt(document.getElementById('building_age').value),
+            area: parseInt(document.getElementById('area').value),
+            earthquake_magnitude: parseFloat(document.getElementById('earthquake_magnitude').value),
+            structure_type: document.getElementById('structure_type').value,
+            soil_type: document.getElementById('soil_type').value,
+            soil_liquefaction_risk: document.getElementById('soil_liquefaction_risk').value,
+            collapse_probability: parseFloat(document.querySelector('.prob-value')?.innerText) || 0
+        };
+
+        localStorage.setItem('buildingData', JSON.stringify(buildingData));
+        localStorage.setItem('selectedLang', document.getElementById('langSelect').value);
+        localStorage.setItem('lang', document.getElementById('langSelect').value);
+        window.location.href = 'AI.html';
+    }
+    </script>
+    <script>
+    (function () {
+        const overlay = document.getElementById('simIntroOverlay');
+        const closeBtn = document.getElementById('simIntroClose');
+        const titleEl = document.getElementById('simIntroTitle');
+        const textEl = document.getElementById('simIntroText');
+        const tipEl = document.getElementById('simIntroTip');
+        const badgeEl = document.getElementById('simIntroBadge');
+        const simBtn = document.querySelector('.sim-link-btn');
+
+        if (!overlay || !closeBtn || !titleEl || !textEl || !tipEl || !badgeEl || !simBtn) return;
+
+        const introTexts = {
+        fa: {
+            badge: 'راهنما',
+            title: 'شبیه‌ساز زلزله چیست؟',
+            text: 'این قابلیت یک شبیه‌ساز دو‌بعدی زلزله است. شما اطلاعات ساختمان را وارد می‌کنید و سامانه نمایش می‌دهد اگر ساختمانی با همین مشخصات در دنیای واقعی در معرض زلزله‌ای با شدت مشخص قرار بگیرد، چه رفتاری خواهد داشت و میزان آسیب احتمالی آن چقدر است.',
+            tip: 'برای شروع، روی دکمه شبیه‌ساز زلزله بزنید.'
+        },
+        en: {
+            badge: 'Guide',
+            title: 'What is the Earthquake Simulator?',
+            text: 'This feature is a 2D earthquake simulator. You enter your building information, and the system shows what could happen if a real building with the same specifications were exposed to an earthquake of a selected magnitude.',
+            tip: 'To begin, click the Earthquake Simulator button.'
+        },
+        tr: {
+            badge: 'Rehber',
+            title: 'Deprem Simülatörü nedir?',
+            text: 'Bu özellik iki boyutlu bir deprem simülatörüdür. Bina bilgilerinizi girersiniz ve sistem aynı özelliklere sahip gerçek bir binanın seçilen büyüklükteki depremde nasıl davranabileceğini gösterir.',
+            tip: 'Başlamak için Deprem Simülatörü düğmesine tıklayın.'
+        }
+        };
+
+        function detectLanguage() {
+        const storedLang = (localStorage.getItem('selectedLang') || localStorage.getItem('lang') || '').toLowerCase();
+        const htmlLang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+        const bodyLang = (document.body.getAttribute('lang') || '').toLowerCase();
+
+        if (storedLang.startsWith('fa')) return 'fa';
+        if (storedLang.startsWith('tr')) return 'tr';
+        if (htmlLang.startsWith('fa') || bodyLang.startsWith('fa')) return 'fa';
+        if (htmlLang.startsWith('tr') || bodyLang.startsWith('tr')) return 'tr';
+        if (htmlLang.startsWith('en') || bodyLang.startsWith('en')) return 'en';
+
+        const pageText = document.body.innerText || '';
+        if (/[\u0600-\u06FF]/.test(pageText)) return 'fa';
+
+        return 'en';
+        }
+
+        function applyIntroLanguage() {
+        const lang = detectLanguage();
+        const content = introTexts[lang] || introTexts.fa;
+
+        badgeEl.textContent = content.badge;
+        titleEl.textContent = content.title;
+        textEl.textContent = content.text;
+        tipEl.textContent = content.tip;
+        closeBtn.setAttribute('aria-label', lang === 'en' ? 'Close' : (lang === 'tr' ? 'Kapat' : 'بستن'));
+        }
+
+        function showIntro() {
+        applyIntroLanguage();
+        overlay.classList.remove('hidden');
+        overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function hideIntro() {
+        overlay.classList.add('hidden');
+        overlay.setAttribute('aria-hidden', 'true');
+        }
+
+        closeBtn.addEventListener('click', hideIntro);
+
+        simBtn.addEventListener('click', function () {
+        hideIntro();
+        });
+
+        document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') hideIntro();
+        });
+
+        window.addEventListener('load', function () {
+        loadStoredSettings();
+        showIntro();
+        });
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anka</title>
+    <link rel="icon" href="logo%202.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <a href="index.html" class="sim-link-btn" id="backBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span data-i18n="back">Back</span>
+    </a>
+
+    <div class="settings-btn" onclick="toggleSettings()" title="Settings">
+        <svg viewBox="0 0 24 24">
+            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+        </svg>
+    </div>
+
+    <div class="glass-panel settings-panel" id="settingsPanel">
+        <h3 data-i18n="settings_title">Settings</h3>
+
+        <div class="settings-group">
+            <label for="langSelect" data-i18n="lang_label">Language</label>
+            <select id="langSelect" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="fa">فارسی</option>
+                <option value="tr">Türkçe</option>
+            </select>
+        </div>
+
+        <div class="settings-group">
+            <label for="primaryColorPicker" data-i18n="primary_color">Primary Color</label>
+            <input type="color" id="primaryColorPicker" value="#1d4ed8" onchange="updateColors()">
+        </div>
+
+        <div class="settings-group">
+            <label for="accentColorPicker" data-i18n="accent_color">Accent Color</label>
+            <input type="color" id="accentColorPicker" value="#00ffcc" onchange="updateColors()">
+        </div>
+
+        <div class="settings-group">
+            <label for="bgColorPicker" data-i18n="bg_color">Background Color</label>
+            <input type="color" id="bgColorPicker" value="#0f172a" onchange="updateColors()">
+        </div>
+    </div>
+
+    <div class="page-shell">
+        <div class="page-header">
+            <h1 data-i18n="chat_title">Chat with Anka</h1>
+            <p data-i18n="chat_subtitle">Ask personalized questions about your building’s safety, structure, and earthquake preparedness.</p>
+        </div>
+
+        <div class="chat-shell">
+            <div class="glass-panel chat-container" id="chatContainer">
+                <div class="meta-card glass-panel" id="buildingSummary"></div>
+                <div class="messages" id="messages"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-panel chat-input-wrap">
+        <div class="chat-input-bar">
+            <textarea
+                id="messageInput"
+                class="chat-textarea"
+                rows="1"
+                data-i18n-placeholder="message_placeholder"
+                placeholder="Type your message..."
+            ></textarea>
+
+            <button class="icon-btn mic-btn" id="micBtn" type="button" onclick="toggleRecording()" title="Record">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3zm5-3a1 1 0 1 1 2 0 7 7 0 0 1-6 6.93V21h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-2.07A7 7 0 0 1 5 12a1 1 0 1 1 2 0 5 5 0 1 0 10 0z"></path>
+                </svg>
+            </button>
+
+            <button class="icon-btn send-btn" type="button" onclick="sendMessage()" title="Send">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3.4 20.4l17.45-7.48c.97-.42.97-1.8 0-2.22L3.4 3.22C2.47 2.82 1.54 3.7 1.86 4.67l1.63 4.95a1 1 0 0 0 .95.69l7.36.19-7.36.19a1 1 0 0 0-.95.69l-1.63 4.95c-.32.97.61 1.85 1.54 1.45z" fill="currentColor"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                back: "Back",
+                settings_title: "Settings",
+                lang_label: "Language",
+                primary_color: "Primary Color",
+                bg_color: "Background Color",
+                accent_color: "Accent Color",
+                chat_title: "Chat with Anka",
+                chat_subtitle: "Ask personalized questions about your building’s safety, structure, and earthquake preparedness.",
+                message_placeholder: "Type your message...",
+                welcome_message: "Hello! I’m Anka, your building safety assistant. I already have your building’s information. How can I help you?",
+                error_message: "Sorry, something went wrong. Please try again.",
+                mic_denied: "Microphone access was denied. Please allow microphone access and try again.",
+                mic_not_supported: "Speech recording is not supported in this browser.",
+                stt_error: "Sorry, I couldn’t transcribe your audio. Please try again.",
+                building_summary: "Current building context",
+                collapse_probability: "Collapse probability",
+                unknown: "Unknown"
+            },
+            fa: {
+                back: "بازگشت",
+                settings_title: "تنظیمات",
+                lang_label: "زبان",
+                primary_color: "رنگ اصلی",
+                bg_color: "رنگ پس‌زمینه",
+                accent_color: "رنگ تأکیدی",
+                chat_title: "گفتگو با Anka",
+                chat_subtitle: "سوالات شخصی‌سازی‌شده درباره ایمنی، سازه و آمادگی ساختمان خود در برابر زلزله بپرسید.",
+                message_placeholder: "پیام خود را بنویسید...",
+                welcome_message: "سلام! من Anka هستم، دستیار ایمنی ساختمان شما. اطلاعات ساختمان شما رو دارم. چطور می‌تونم کمکتون کنم؟",
+                error_message: "متأسفم، مشکلی پیش آمد. لطفاً دوباره تلاش کنید.",
+                mic_denied: "دسترسی به میکروفون رد شد. لطفاً دسترسی میکروفون را فعال کنید و دوباره تلاش کنید.",
+                mic_not_supported: "ضبط صدا در این مرورگر پشتیبانی نمی‌شود.",
+                stt_error: "متأسفم، نتوانستم صدای شما را تبدیل به متن کنم. لطفاً دوباره تلاش کنید.",
+                building_summary: "اطلاعات فعلی ساختمان",
+                collapse_probability: "احتمال ریزش",
+                unknown: "نامشخص"
+            },
+            tr: {
+                back: "Geri",
+                settings_title: "Ayarlar",
+                lang_label: "Dil",
+                primary_color: "Ana Renk",
+                bg_color: "Arka Plan Rengi",
+                accent_color: "Vurgu Rengi",
+                chat_title: "Anka ile Sohbet",
+                chat_subtitle: "Binanızın güvenliği, yapısı ve deprem hazırlığı hakkında kişiselleştirilmiş sorular sorun.",
+                message_placeholder: "Mesajınızı yazın...",
+                welcome_message: "Merhaba! Ben Anka, bina güvenliği asistanınızım. Bina bilgileriniz elimde. Size nasıl yardımcı olabilirim?",
+                error_message: "Üzgünüm, bir şeyler ters gitti. Lütfen tekrar deneyin.",
+                mic_denied: "Mikrofon erişimi reddedildi. Lütfen mikrofon izni verip tekrar deneyin.",
+                mic_not_supported: "Ses kaydı bu tarayıcıda desteklenmiyor.",
+                stt_error: "Üzgünüm, sesinizi metne dönüştüremedim. Lütfen tekrar deneyin.",
+                building_summary: "Mevcut bina bilgisi",
+                collapse_probability: "Çökme olasılığı",
+                unknown: "Bilinmiyor"
+            }
+        };
+
+        let currentLang = localStorage.getItem('selectedLang') || localStorage.getItem('lang') || 'en';
+        let chatHistory = [];
+        let buildingData = {};
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let recordingStream = null;
+        let recordingTimeout = null;
+        let isRecording = false;
+
+        const messagesEl = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const chatContainer = document.getElementById('chatContainer');
+        const micBtn = document.getElementById('micBtn');
+        const buildingSummary = document.getElementById('buildingSummary');
+
+        function hexToRgb(hex) {
+            if (!hex) return "0, 255, 204";
+            let clean = hex.replace('#', '').trim();
+            if (clean.length === 3) {
+                clean = clean.split('').map(ch => ch + ch).join('');
+            }
+            const bigint = parseInt(clean, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+            return `${r}, ${g}, ${b}`;
+        }
+
+        function updateDirection() {
+            const isRTL = currentLang === 'fa';
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+            messageInput.style.direction = isRTL ? 'rtl' : 'ltr';
+            messageInput.style.textAlign = isRTL ? 'right' : 'left';
+        }
+
+        function applyTranslations() {
+            const dict = translations[currentLang] || translations.en;
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    el.textContent = dict[key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (dict[key]) {
+                    el.placeholder = dict[key];
+                }
+            });
+
+            updateDirection();
+            renderBuildingSummary();
+        }
+
+        function updateColors() {
+            const bgColor = document.getElementById('bgColorPicker').value;
+            const primaryColor = document.getElementById('primaryColorPicker').value;
+            const accentColor = document.getElementById('accentColorPicker').value;
+
+            document.documentElement.style.setProperty('--bg-color', bgColor);
+            document.documentElement.style.setProperty('--primary-color', primaryColor);
+            document.documentElement.style.setProperty('--secondary-color', accentColor);
+            document.documentElement.style.setProperty('--accent', accentColor);
+            document.documentElement.style.setProperty('--primary-rgb', hexToRgb(primaryColor));
+            document.documentElement.style.setProperty('--accent-rgb', hexToRgb(accentColor));
+
+            localStorage.setItem('bgColor', bgColor);
+            localStorage.setItem('primaryColor', primaryColor);
+            localStorage.setItem('accentColor', accentColor);
+        }
+
+        function loadStoredTheme() {
+            const storedBg = localStorage.getItem('bgColor') || '#0f172a';
+            const storedPrimary = localStorage.getItem('primaryColor') || '#1d4ed8';
+            const storedAccent = localStorage.getItem('accentColor') || '#00ffcc';
+
+            document.getElementById('bgColorPicker').value = storedBg;
+            document.getElementById('primaryColorPicker').value = storedPrimary;
+            document.getElementById('accentColorPicker').value = storedAccent;
+
+            document.documentElement.style.setProperty('--bg-color', storedBg);
+            document.documentElement.style.setProperty('--primary-color', storedPrimary);
+            document.documentElement.style.setProperty('--secondary-color', storedAccent);
+            document.documentElement.style.setProperty('--accent', storedAccent);
+            document.documentElement.style.setProperty('--primary-rgb', hexToRgb(storedPrimary));
+            document.documentElement.style.setProperty('--accent-rgb', hexToRgb(storedAccent));
+        }
+
+        function changeLanguage() {
+            currentLang = document.getElementById('langSelect').value;
+            localStorage.setItem('selectedLang', currentLang);
+            localStorage.setItem('lang', currentLang);
+            applyTranslations();
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('show');
+        }
+
+        function autoGrowTextarea() {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 180) + 'px';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function formatMessageContent(text) {
+            return escapeHtml(text);
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 40);
+        }
+
+        function addMessage(role, content, options = {}) {
+            const row = document.createElement('div');
+            row.className = `message-row ${role}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+
+            if (options.isTyping) {
+                bubble.innerHTML = `
+                    <div class="typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                `;
+                bubble.dataset.typing = 'true';
+            } else {
+                bubble.innerHTML = formatMessageContent(content);
+            }
+
+            row.appendChild(bubble);
+            messagesEl.appendChild(row);
+            scrollToBottom();
+            return row;
+        }
+
+        function removeTypingIndicator() {
+            const typing = messagesEl.querySelector('[data-typing="true"]');
+            if (typing && typing.parentElement) {
+                typing.parentElement.remove();
+            }
+        }
+
+        function getBuildingData() {
+            try {
+                const raw = localStorage.getItem('buildingData');
+                return raw ? JSON.parse(raw) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function renderBuildingSummary() {
+            const dict = translations[currentLang] || translations.en;
+            const prob = buildingData?.collapse_probability;
+            const probText = (typeof prob === 'number' && !isNaN(prob))
+                ? `${prob}%`
+                : dict.unknown;
+
+            const entries = Object.entries(buildingData || {})
+                .filter(([key]) => key !== 'collapse_probability')
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(' • ');
+
+            buildingSummary.innerHTML = `
+                <strong>${dict.building_summary}:</strong><br>
+                ${entries || dict.unknown}<br>
+                <strong>${dict.collapse_probability}:</strong> ${probText}
+            `;
+        }
+
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+
+            const historyForRequest = [...chatHistory];
+            chatHistory.push({ role: 'user', content: text });
+
+            messageInput.value = '';
+            autoGrowTextarea();
+
+            addMessage('assistant', '', { isTyping: true });
+
+            try {
+                const response = await fetch('http://localhost:5070/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        history: historyForRequest,
+                        building_data: buildingData
+                    })
+                });
+
+                const data = await response.json().catch(() => ({}));
+                removeTypingIndicator();
+
+                if (!response.ok || !data.reply) {
+                    throw new Error(data.error || 'Chat request failed');
+                }
+
+                chatHistory.push({ role: 'assistant', content: data.reply });
+                addMessage('assistant', data.reply);
+            } catch (error) {
+                removeTypingIndicator();
+                const errText = (translations[currentLang] || translations.en).error_message;
+                chatHistory.push({ role: 'assistant', content: errText });
+                addMessage('assistant', errText);
+            }
+        }
+
+        async function toggleRecording() {
+            if (isRecording) {
+                stopRecording();
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+                alert((translations[currentLang] || translations.en).mic_not_supported);
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                recordingStream = stream;
+                recordedChunks = [];
+
+                let mimeType = '';
+                if (MediaRecorder.isTypeSupported('audio/webm')) {
+                    mimeType = 'audio/webm';
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    mimeType = 'audio/mp4';
+                }
+
+                mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    clearTimeout(recordingTimeout);
+                    micBtn.classList.remove('recording');
+                    isRecording = false;
+
+                    const blobType = mimeType || (recordedChunks[0] && recordedChunks[0].type) || 'audio/webm';
+                    const audioBlob = new Blob(recordedChunks, { type: blobType });
+
+                    if (recordingStream) {
+                        recordingStream.getTracks().forEach(track => track.stop());
+                        recordingStream = null;
+                    }
+
+                    if (!audioBlob.size) return;
+
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, 'audio.webm');
+
+                    try {
+                        const response = await fetch('http://localhost:5070/stt', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await response.json().catch(() => ({}));
+                        if (!response.ok || !data.text) {
+                            throw new Error(data.error || 'STT failed');
+                        }
+
+                        messageInput.value = data.text;
+                        autoGrowTextarea();
+                        messageInput.focus();
+                    } catch (e) {
+                        alert((translations[currentLang] || translations.en).stt_error);
+                    }
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                micBtn.classList.add('recording');
+
+                recordingTimeout = setTimeout(() => {
+                    if (isRecording) stopRecording();
+                }, 30000);
+            } catch (error) {
+                alert((translations[currentLang] || translations.en).mic_denied);
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+            }
+        }
+
+        function initChat() {
+            buildingData = getBuildingData();
+            renderBuildingSummary();
+
+            const dict = translations[currentLang] || translations.en;
+            const welcome = dict.welcome_message;
+            chatHistory.push({ role: 'assistant', content: welcome });
+            addMessage('assistant', welcome);
+        }
+
+        messageInput.addEventListener('input', autoGrowTextarea);
+
+        messageInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            const panel = document.getElementById('settingsPanel');
+            const settingsBtn = document.querySelector('.settings-btn');
+            if (!panel.contains(e.target) && !settingsBtn.contains(e.target)) {
+                panel.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('load', () => {
+            currentLang = localStorage.getItem('selectedLang') || localStorage.getItem('lang') || 'en';
+            document.getElementById('langSelect').value = currentLang;
+
+            loadStoredTheme();
+            applyTranslations();
+            autoGrowTextarea();
+            initChat();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,2236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anka — Seismic Collapse Simulator</title>
+<link rel="icon" href="logo%202.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="sim-page">
+
+<!-- ═══ TOP BAR ═══ -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      <span data-i18n="back_predictor">Predictor</span>
+    </a>
+    <span class="status-badge ready" id="statusBadge" data-i18n="status_ready">Ready</span>
+  </div>
+  <div class="topbar-center"><span class="logo-text" data-i18n="sim_title">Anka Collapse Simulator</span></div>
+  <div class="topbar-right">
+    <span class="time-display" id="simTimeDisplay">T: 0.00s</span>
+    <button class="settings-btn sim-settings-btn" type="button" onclick="toggleSettings()" data-i18n-title="settings_title" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24">
+        <path fill="currentColor" d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div class="glass-panel settings-panel" id="settingsPanel">
+  <h3 data-i18n="settings_title">Settings</h3>
+  <div class="settings-group">
+    <label for="langSelect" data-i18n="lang_label">Language</label>
+    <select id="langSelect" onchange="changeLanguage()">
+      <option value="en">English</option>
+      <option value="fa">فارسی</option>
+      <option value="tr">Türkçe</option>
+    </select>
+  </div>
+  <div class="settings-group">
+    <label for="primaryColorPicker" data-i18n="primary_color">Primary Color</label>
+    <input type="color" id="primaryColorPicker" value="#1d4ed8" onchange="updateColors()">
+  </div>
+  <div class="settings-group">
+    <label for="accentColorPicker" data-i18n="accent_color">Accent Color</label>
+    <input type="color" id="accentColorPicker" value="#00ffcc" onchange="updateColors()">
+  </div>
+  <div class="settings-group">
+    <label for="bgColorPicker" data-i18n="bg_color">Background Color</label>
+    <input type="color" id="bgColorPicker" value="#0f172a" onchange="updateColors()">
+  </div>
+</div>
+
+<!-- ═══ MAIN LAYOUT ═══ -->
+<div class="simulation-shell">
+
+  <!-- LEFT PANEL -->
+  <div class="panel" id="controlPanel">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span data-i18n="building_parameters">Building Parameters</span>
+    </div>
+    <div class="ig"><label data-i18n="structure_type">Structure Type</label>
+      <select id="structureType"><option value="concrete" data-i18n="reinforced_concrete">Reinforced Concrete</option><option value="steel" data-i18n="steel_frame">Steel Frame</option><option value="masonry" data-i18n="masonry_brick">Masonry / Brick</option><option value="wood" data-i18n="wood_frame">Wood Frame</option></select>
+    </div>
+    <div class="ig"><label data-i18n="number_floors">Number of Floors</label>
+      <div class="range-row"><input type="range" id="numFloors" min="2" max="25" value="8" oninput="document.getElementById('numFloorsVal').textContent=this.value"><span class="range-val" id="numFloorsVal">8</span></div>
+    </div>
+    <div class="ig"><label data-i18n="building_age">Building Age (years)</label>
+      <div class="range-row"><input type="range" id="buildingAge" min="0" max="80" value="25" oninput="document.getElementById('buildingAgeVal').textContent=this.value"><span class="range-val" id="buildingAgeVal">25</span></div>
+    </div>
+    <div class="ig"><label data-i18n="shear_wall">Shear Wall</label>
+      <select id="shearWall"><option value="yes" data-i18n="yes_present">Yes - Present</option><option value="no" data-i18n="no_absent">No - Absent</option></select>
+    </div>
+    <div class="ig"><label data-i18n="soil_type">Soil Type</label>
+      <select id="soilType"><option value="rock" data-i18n="rock_type">Rock (Type A)</option><option value="gravel" data-i18n="gravel_type">Gravel (Type B)</option><option value="sand" selected data-i18n="sand_type">Sand (Type C)</option><option value="clay" data-i18n="clay_type">Clay (Type D)</option><option value="soft" data-i18n="soft_type">Soft Soil (Type E)</option></select>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3-8 10-8 10 8 10 8"/><path d="M2 12s3 8 10 8 10-8 10-8"/></svg>
+      <span data-i18n="earthquake_parameters">Earthquake Parameters</span>
+    </div>
+    <div class="ig"><label data-i18n="magnitude_richter">Magnitude (Richter)</label>
+      <div class="range-row"><input type="range" id="magnitude" min="3" max="9.5" step="0.1" value="6.5" oninput="document.getElementById('magVal').textContent=parseFloat(this.value).toFixed(1)"><span class="range-val" id="magVal">6.5</span></div>
+    </div>
+    <div class="ig"><label data-i18n="duration_seconds">Duration (seconds)</label>
+      <div class="range-row"><input type="range" id="duration" min="5" max="60" value="20" oninput="document.getElementById('durVal').textContent=this.value"><span class="range-val" id="durVal">20</span></div>
+    </div>
+    <div class="ig"><label data-i18n="depth_km">Epicenter Depth (km)</label>
+      <div class="range-row"><input type="range" id="depth" min="1" max="100" value="15" oninput="document.getElementById('depthVal').textContent=this.value"><span class="range-val" id="depthVal">15</span></div>
+    </div>
+    <div class="ig"><label data-i18n="liquefaction_risk">Soil Liquefaction Risk</label>
+      <select id="liquefaction"><option value="low" data-i18n="low">Low</option><option value="medium" selected data-i18n="medium">Medium</option><option value="high" data-i18n="high">High</option></select>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="speed-control">
+      <label data-i18n="speed">Speed</label>
+      <input type="range" id="simSpeed" min="0.25" max="3" step="0.25" value="1" oninput="document.getElementById('speedVal').textContent=this.value+'x'">
+      <span class="range-val" id="speedVal">1x</span>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" id="startBtn" data-i18n="start_btn">Start</button>
+      <button class="btn btn-secondary" id="resetBtn" data-i18n="reset_btn">Reset</button>
+      <button class="btn btn-warning" id="pauseBtn" data-i18n="pause_btn">Pause</button>
+    </div>
+  </div>
+
+  <!-- CENTER: CANVAS -->
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="simCanvas"></canvas>
+    <div class="cinematic-bars"></div>
+    <div class="canvas-overlay" id="canvasOverlay">
+      <div class="overlay-tag"><span data-i18n="pga_short">PGA</span>: <span class="ov-val" id="ovPGA">0.00g</span></div>
+      <div class="overlay-tag"><span data-i18n="drift_short">Drift</span>: <span class="ov-val" id="ovDrift">0.00%</span></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="panel" id="monitorPanel">
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <span data-i18n="real_time_monitoring">Real-Time Monitoring</span>
+    </div>
+    <div class="monitor-card"><div class="mc-label" data-i18n="peak_ground_accel">Peak Ground Accel.</div><div class="mc-value neutral" id="monPGA">0.00g</div></div>
+    <div class="monitor-card"><div class="mc-label" data-i18n="max_story_drift">Max Inter-Story Drift</div><div class="mc-value neutral" id="monDrift">0.00%</div></div>
+    <div class="monitor-card"><div class="mc-label" data-i18n="base_shear">Base Shear</div><div class="mc-value neutral" id="monBaseShear">0 kN</div></div>
+    <div class="monitor-card">
+      <div class="mc-label" data-i18n="elapsed_time">Elapsed Time</div>
+      <div class="mc-value neutral" id="monTime">0.00s</div>
+    </div>
+
+    <div class="monitor-card">
+      <div class="mc-label" data-i18n="peak_pga">Peak PGA</div>
+      <div class="mc-value neutral" id="monPeakPGA">0.000g</div>
+    </div>
+
+    <div class="health-bar-wrap">
+      <div class="health-bar-label"><span data-i18n="structural_health">Structural Health</span><span id="healthPercent">100%</span></div>
+      <div class="health-bar-bg"><div class="health-bar-fill" id="healthBar"></div></div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></svg>
+      <span data-i18n="floor_damage">Floor Damage</span>
+    </div>
+    <div class="floor-bars" id="floorBars"></div>
+
+    <div class="section-divider"></div>
+    <div class="section-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <span data-i18n="post_analysis">Post-Earthquake Analysis</span>
+    </div>
+    <div class="analysis-box" id="analysisBox">
+      <div class="analysis-result" id="analysisResult">—</div>
+      <ul class="analysis-factors" id="analysisFactors"></ul>
+    </div>
+    <div id="analysisPlaceholder" class="analysis-placeholder" data-i18n="analysis_placeholder">Run simulation to see analysis...</div>
+  </div>
+</div>
+
+<!-- ═══════════ JAVASCRIPT ═══════════ -->
+<script>
+// ============================================================
+//  Anka SEISMIC COLLAPSE SIMULATOR — CINEMATIC EDITION
+//  Pure Vanilla JS + Canvas — Zero Dependencies
+// ============================================================
+
+const CONFIG = {
+  GRAVITY: 9.81,
+  PPM: 22,                       // pixels per meter
+  GROUND_RATIO: 0.88,
+  FLOOR_H: 3.2,                  // meters
+  BAY_W: 5.0,
+  NUM_BAYS: 3,
+  COL_W: 0.45,
+  BEAM_H: 0.5,
+  WALL_T: 0.25,
+  DAMPING: 0.05,
+  DEBRIS_MAX: 600,
+  DUST_MAX: 400,
+  CINE_BAR: 24,
+  CRACK_DENSITY: 8,
+  DRIFT_MINOR: 0.005,
+  DRIFT_MOD: 0.015,
+  DRIFT_SEVERE: 0.03,
+  DRIFT_COLLAPSE: 0.06,
+  SOIL_AMP: { rock:0.8, gravel:0.95, sand:1.1, clay:1.35, soft:1.7 },
+  DUCTILITY: { steel:1.5, concrete:1.0, wood:1.2, masonry:0.55 },
+  AGE_FACTOR: 0.006,
+  SHEAR_WALL_BONUS: 1.65,
+  LIQ_FACTOR: { low:1.0, medium:1.25, high:1.6 },
+  CLR: {
+    sky_top:'#070b14', sky_bot:'#111729',
+    ground:'#1a1a2e', ground_line:'#2d2d4a',
+    bldg_fill:'#2a2a40', bldg_stroke:'#4a4a6a',
+    col:'#5a6a8a', beam:'#5a6a8a', wall:'#6a7a9a',
+    crack:'#ff6b35',
+    dmg:['#4a6a4a','#fbbf24','#f97316','#ef4444','#991b1b'],
+    debris:['#8b7355','#a0937a','#6b5b4a','#c4b39a','#555','#777'],
+    dust:'rgba(180,165,140,',
+    win_lit:'rgba(255,220,120,0.12)', win_dark:'rgba(0,0,0,0.3)',
+    concrete:'#5a6a8a', damaged1:'#fbbf24', damaged2:'#f97316', damaged3:'#ef4444'
+  }
+};
+
+const simTranslations = {
+  en: {
+    settings_title: "Settings",
+    lang_label: "Language",
+    primary_color: "Primary Color",
+    accent_color: "Accent Color",
+    bg_color: "Background Color",
+    back_predictor: "Predictor",
+    status_ready: "Ready",
+    status_running: "Running",
+    status_complete: "Complete",
+    status_idle: "Ready",
+    sim_title: "Anka Collapse Simulator",
+    building_parameters: "Building Parameters",
+    structure_type: "Structure Type",
+    reinforced_concrete: "Reinforced Concrete",
+    steel_frame: "Steel Frame",
+    masonry_brick: "Masonry / Brick",
+    wood_frame: "Wood Frame",
+    number_floors: "Number of Floors",
+    building_age: "Building Age (years)",
+    shear_wall: "Shear Wall",
+    yes_present: "Yes - Present",
+    no_absent: "No - Absent",
+    soil_type: "Soil Type",
+    rock_type: "Rock (Type A)",
+    gravel_type: "Gravel (Type B)",
+    sand_type: "Sand (Type C)",
+    clay_type: "Clay (Type D)",
+    soft_type: "Soft Soil (Type E)",
+    earthquake_parameters: "Earthquake Parameters",
+    magnitude_richter: "Magnitude (Richter)",
+    duration_seconds: "Duration (seconds)",
+    depth_km: "Epicenter Depth (km)",
+    liquefaction_risk: "Soil Liquefaction Risk",
+    low: "Low",
+    medium: "Medium",
+    high: "High",
+    speed: "Speed",
+    start_btn: "Start",
+    reset_btn: "Reset",
+    pause_btn: "Pause",
+    resume_btn: "Resume",
+    pga_short: "PGA",
+    drift_short: "Drift",
+    real_time_monitoring: "Real-Time Monitoring",
+    peak_ground_accel: "Peak Ground Accel.",
+    max_story_drift: "Max Inter-Story Drift",
+    base_shear: "Base Shear",
+    elapsed_time: "Elapsed Time",
+    peak_pga: "Peak PGA",
+    structural_health: "Structural Health",
+    floor_damage: "Floor Damage",
+    post_analysis: "Post-Earthquake Analysis",
+    analysis_placeholder: "Run simulation to see analysis...",
+    idle_title: "[ SEISMIC COLLAPSE SIMULATOR ]",
+    idle_hint: "Configure parameters and press START",
+    time_prefix: "T",
+    phase_active: "EARTHQUAKE ACTIVE",
+    phase_post: "POST-QUAKE",
+    severity_safe: "Safe",
+    severity_moderate: "Moderate",
+    severity_severe: "Severe",
+    severity_collapse: "Collapse",
+    collapsed: "Collapsed",
+    peak_pga_label: "Peak PGA",
+    max_drift_label: "Max Drift",
+    floors_collapsed_label: "Floors Collapsed",
+    contributing_factors: "Contributing Factors",
+    floor_prefix: "F",
+    factor_high_magnitude: "High magnitude earthquake (M{mag}) generated extreme ground accelerations (PGA: {pga}g).",
+    factor_moderate_magnitude: "Moderate earthquake (M{mag}) with PGA of {pga}g.",
+    factor_low_ductility: "Low ductility structure ({type}) - brittle failure mode with limited energy dissipation.",
+    factor_high_ductility: "High ductility structure ({type}) - good energy absorption capacity.",
+    factor_no_shear: "Absence of shear walls reduced lateral resistance significantly, allowing excessive inter-story drift.",
+    factor_with_shear: "Shear walls provided additional lateral stiffness and drift control.",
+    factor_age: "Aged structure ({age} years) - material degradation reduced effective capacity by about {percent}%.",
+    factor_soft_soil: "Soft soil conditions amplified ground motion by {percent}%.",
+    factor_liq_high: "High liquefaction risk caused additional foundation instability and amplified structural demands.",
+    factor_max_drift: "Maximum inter-story drift reached {drift}% (threshold for collapse: {threshold}%).",
+    factor_collapsed_floors: "Progressive collapse affected {count} of {total} floors."
+  },
+  fa: {
+    settings_title: "تنظیمات",
+    lang_label: "زبان",
+    primary_color: "رنگ اصلی",
+    accent_color: "رنگ تأکیدی",
+    bg_color: "رنگ پس‌زمینه",
+    back_predictor: "پیش‌بینی",
+    status_ready: "آماده",
+    status_running: "در حال اجرا",
+    status_complete: "کامل شد",
+    status_idle: "آماده",
+    sim_title: "شبیه‌ساز ریزش Anka",
+    building_parameters: "پارامترهای ساختمان",
+    structure_type: "نوع سازه",
+    reinforced_concrete: "بتن‌آرمه",
+    steel_frame: "قاب فولادی",
+    masonry_brick: "مصالح بنایی / آجری",
+    wood_frame: "قاب چوبی",
+    number_floors: "تعداد طبقات",
+    building_age: "سن ساختمان (سال)",
+    shear_wall: "دیوار برشی",
+    yes_present: "بله - موجود",
+    no_absent: "خیر - وجود ندارد",
+    soil_type: "نوع خاک",
+    rock_type: "سنگ (نوع A)",
+    gravel_type: "شن (نوع B)",
+    sand_type: "ماسه (نوع C)",
+    clay_type: "رس (نوع D)",
+    soft_type: "خاک نرم (نوع E)",
+    earthquake_parameters: "پارامترهای زلزله",
+    magnitude_richter: "بزرگی (ریشتر)",
+    duration_seconds: "مدت زمان (ثانیه)",
+    depth_km: "عمق کانون (کیلومتر)",
+    liquefaction_risk: "خطر روانگرایی خاک",
+    low: "کم",
+    medium: "متوسط",
+    high: "زیاد",
+    speed: "سرعت",
+    start_btn: "شروع",
+    reset_btn: "بازنشانی",
+    pause_btn: "توقف",
+    resume_btn: "ادامه",
+    pga_short: "PGA",
+    drift_short: "تغییرمکان نسبی",
+    real_time_monitoring: "پایش زنده",
+    peak_ground_accel: "شتاب اوج زمین",
+    max_story_drift: "بیشینه دریفت بین‌طبقه‌ای",
+    base_shear: "برش پایه",
+    elapsed_time: "زمان سپری‌شده",
+    peak_pga: "بیشینه PGA",
+    structural_health: "سلامت سازه",
+    floor_damage: "آسیب طبقات",
+    post_analysis: "تحلیل پس از زلزله",
+    analysis_placeholder: "برای مشاهده تحلیل، شبیه‌سازی را اجرا کنید...",
+    idle_title: "[ شبیه‌ساز ریزش لرزه‌ای ]",
+    idle_hint: "پارامترها را تنظیم کنید و شروع را بزنید",
+    time_prefix: "زمان",
+    phase_active: "زلزله فعال",
+    phase_post: "پس از زلزله",
+    severity_safe: "ایمن",
+    severity_moderate: "متوسط",
+    severity_severe: "شدید",
+    severity_collapse: "ریزش",
+    collapsed: "ریخته",
+    peak_pga_label: "بیشینه PGA",
+    max_drift_label: "بیشینه دریفت",
+    floors_collapsed_label: "طبقات ریخته",
+    contributing_factors: "عوامل مؤثر",
+    floor_prefix: "ط",
+    factor_high_magnitude: "زلزله با بزرگی بالا (M{mag}) شتاب زمین شدیدی ایجاد کرد (PGA: {pga}g).",
+    factor_moderate_magnitude: "زلزله متوسط (M{mag}) با PGA برابر {pga}g.",
+    factor_low_ductility: "شکل‌پذیری پایین سازه ({type}) باعث رفتار ترد و اتلاف انرژی محدود شد.",
+    factor_high_ductility: "شکل‌پذیری بالای سازه ({type}) ظرفیت جذب انرژی مناسبی فراهم کرد.",
+    factor_no_shear: "نبود دیوار برشی مقاومت جانبی را به‌طور محسوس کاهش داد و دریفت بین‌طبقه‌ای را افزایش داد.",
+    factor_with_shear: "دیوارهای برشی سختی جانبی و کنترل دریفت را بهبود دادند.",
+    factor_age: "سازه قدیمی ({age} سال) به دلیل افت مصالح، ظرفیت مؤثر را حدود {percent}% کاهش داد.",
+    factor_soft_soil: "شرایط خاک نرم حرکت زمین را {percent}% تقویت کرد.",
+    factor_liq_high: "خطر زیاد روانگرایی باعث ناپایداری پی و افزایش تقاضای سازه‌ای شد.",
+    factor_max_drift: "بیشینه دریفت بین‌طبقه‌ای به {drift}% رسید (آستانه ریزش: {threshold}%).",
+    factor_collapsed_floors: "ریزش پیشرونده {count} طبقه از {total} طبقه را درگیر کرد."
+  },
+  tr: {
+    settings_title: "Ayarlar",
+    lang_label: "Dil",
+    primary_color: "Ana Renk",
+    accent_color: "Vurgu Rengi",
+    bg_color: "Arka Plan Rengi",
+    back_predictor: "Tahmin",
+    status_ready: "Hazır",
+    status_running: "Çalışıyor",
+    status_complete: "Tamamlandı",
+    status_idle: "Hazır",
+    sim_title: "Anka Çökme Simülatörü",
+    building_parameters: "Bina Parametreleri",
+    structure_type: "Yapı Türü",
+    reinforced_concrete: "Betonarme",
+    steel_frame: "Çelik Çerçeve",
+    masonry_brick: "Yığma / Tuğla",
+    wood_frame: "Ahşap Çerçeve",
+    number_floors: "Kat Sayısı",
+    building_age: "Bina Yaşı (yıl)",
+    shear_wall: "Perde Duvar",
+    yes_present: "Evet - Var",
+    no_absent: "Hayır - Yok",
+    soil_type: "Zemin Türü",
+    rock_type: "Kaya (Tip A)",
+    gravel_type: "Çakıl (Tip B)",
+    sand_type: "Kum (Tip C)",
+    clay_type: "Kil (Tip D)",
+    soft_type: "Yumuşak Zemin (Tip E)",
+    earthquake_parameters: "Deprem Parametreleri",
+    magnitude_richter: "Büyüklük (Richter)",
+    duration_seconds: "Süre (saniye)",
+    depth_km: "Odak Derinliği (km)",
+    liquefaction_risk: "Zemin Sıvılaşma Riski",
+    low: "Düşük",
+    medium: "Orta",
+    high: "Yüksek",
+    speed: "Hız",
+    start_btn: "Başlat",
+    reset_btn: "Sıfırla",
+    pause_btn: "Duraklat",
+    resume_btn: "Sürdür",
+    pga_short: "PGA",
+    drift_short: "Öteleme",
+    real_time_monitoring: "Canlı İzleme",
+    peak_ground_accel: "Tepe Yer İvmesi",
+    max_story_drift: "Maks. Katlar Arası Öteleme",
+    base_shear: "Taban Kesmesi",
+    elapsed_time: "Geçen Süre",
+    peak_pga: "Tepe PGA",
+    structural_health: "Yapısal Sağlık",
+    floor_damage: "Kat Hasarı",
+    post_analysis: "Deprem Sonrası Analiz",
+    analysis_placeholder: "Analizi görmek için simülasyonu çalıştırın...",
+    idle_title: "[ SİSMİK ÇÖKME SİMÜLATÖRÜ ]",
+    idle_hint: "Parametreleri ayarlayın ve BAŞLAT'a basın",
+    time_prefix: "T",
+    phase_active: "DEPREM AKTİF",
+    phase_post: "DEPREM SONRASI",
+    severity_safe: "Güvenli",
+    severity_moderate: "Orta",
+    severity_severe: "Ağır",
+    severity_collapse: "Çökme",
+    collapsed: "Çöktü",
+    peak_pga_label: "Tepe PGA",
+    max_drift_label: "Maks. Öteleme",
+    floors_collapsed_label: "Çöken Katlar",
+    contributing_factors: "Etkili Faktörler",
+    floor_prefix: "K",
+    factor_high_magnitude: "Yüksek büyüklükte deprem (M{mag}) aşırı yer ivmeleri oluşturdu (PGA: {pga}g).",
+    factor_moderate_magnitude: "Orta büyüklükte deprem (M{mag}), PGA {pga}g.",
+    factor_low_ductility: "Düşük süneklikli yapı ({type}) sınırlı enerji sönümleme ile gevrek hasar davranışı gösterdi.",
+    factor_high_ductility: "Yüksek süneklikli yapı ({type}) iyi enerji yutma kapasitesi sağladı.",
+    factor_no_shear: "Perde duvarların olmaması yatay dayanımı belirgin azaltarak katlar arası ötelemeyi artırdı.",
+    factor_with_shear: "Perde duvarlar ek yatay rijitlik ve öteleme kontrolü sağladı.",
+    factor_age: "Yaşlı yapı ({age} yıl) malzeme bozulması nedeniyle etkin kapasiteyi yaklaşık {percent}% azalttı.",
+    factor_soft_soil: "Yumuşak zemin koşulları yer hareketini %{percent} artırdı.",
+    factor_liq_high: "Yüksek sıvılaşma riski temel dengesizliğini ve yapısal talepleri artırdı.",
+    factor_max_drift: "Maksimum katlar arası öteleme %{drift} değerine ulaştı (çökme eşiği: %{threshold}).",
+    factor_collapsed_floors: "İlerleyici çökme {total} katın {count} tanesini etkiledi."
+  }
+};
+
+let currentLang = localStorage.getItem('selectedLang') || localStorage.getItem('lang') || 'en';
+
+function hexToRgb(hex) {
+  const clean = (hex || '#00ffcc').replace('#', '').trim();
+  const full = clean.length === 3 ? clean.split('').map(ch => ch + ch).join('') : clean;
+  const bigint = parseInt(full, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `${r}, ${g}, ${b}`;
+}
+
+function t(key, vars = {}) {
+  const source = (simTranslations[currentLang] && simTranslations[currentLang][key])
+    || simTranslations.en[key]
+    || key;
+  return Object.entries(vars).reduce(
+    (text, [name, value]) => text.replaceAll(`{${name}}`, value),
+    source
+  );
+}
+
+function updateDirection() {
+  const isRTL = currentLang === 'fa';
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+}
+
+function updateColors() {
+  const bg = document.getElementById('bgColorPicker').value;
+  const primary = document.getElementById('primaryColorPicker').value;
+  const accent = document.getElementById('accentColorPicker').value;
+
+  document.documentElement.style.setProperty('--bg-color', bg);
+  document.documentElement.style.setProperty('--primary-color', primary);
+  document.documentElement.style.setProperty('--secondary-color', accent);
+  document.documentElement.style.setProperty('--accent', accent);
+  document.documentElement.style.setProperty('--primary-rgb', hexToRgb(primary));
+  document.documentElement.style.setProperty('--accent-rgb', hexToRgb(accent));
+
+  localStorage.setItem('bgColor', bg);
+  localStorage.setItem('primaryColor', primary);
+  localStorage.setItem('accentColor', accent);
+}
+
+function loadStoredTheme() {
+  document.getElementById('langSelect').value = currentLang;
+  document.getElementById('bgColorPicker').value = localStorage.getItem('bgColor') || '#0f172a';
+  document.getElementById('primaryColorPicker').value = localStorage.getItem('primaryColor') || '#1d4ed8';
+  document.getElementById('accentColorPicker').value = localStorage.getItem('accentColor') || '#00ffcc';
+  updateColors();
+}
+
+function applyTranslations() {
+  const dict = simTranslations[currentLang] || simTranslations.en;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) el.textContent = dict[key];
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    if (dict[key]) {
+      el.setAttribute('title', dict[key]);
+      el.setAttribute('aria-label', dict[key]);
+    }
+  });
+
+  updateDirection();
+  if (window.simulator) window.simulator.refreshLocalizedUi();
+}
+
+function changeLanguage() {
+  currentLang = document.getElementById('langSelect').value;
+  localStorage.setItem('selectedLang', currentLang);
+  localStorage.setItem('lang', currentLang);
+  applyTranslations();
+}
+
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+}
+
+// ▼▼▼ PART 2 STARTS HERE ▼▼▼
+// ============================================================
+//  PART 2: ENGINE CORE — Physics, Building, Earthquake, Particles
+// ============================================================
+
+// ─── UTILITY HELPERS ───
+const lerp = (a,b,t) => a + (b - a) * t;
+const clamp = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
+const rand = (lo,hi) => Math.random() * (hi - lo) + lo;
+const randInt = (lo,hi) => Math.floor(rand(lo, hi + 1));
+const dist = (x1,y1,x2,y2) => Math.hypot(x2-x1, y2-y1);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+// ============================================================
+//  EARTHQUAKE MODEL
+//  Multi-wave ground motion with envelope & stochastic noise
+// ============================================================
+class EarthquakeModel {
+  constructor(magnitude, duration, depth, soilType, liquefaction) {
+    this.mag = magnitude;
+    this.dur = duration;
+    this.depth = Math.max(depth, 1);
+    this.soilAmp = CONFIG.SOIL_AMP[soilType] || 1.0;
+    this.liqFactor = CONFIG.LIQ_FACTOR[liquefaction] || 1.0;
+
+    // PGA estimation (simplified Boore-Atkinson style)
+    const logPGA = 0.28 * this.mag - 0.8 * Math.log10(this.depth + 10) - 1.2;
+    this.basePGA = Math.pow(10, logPGA) * this.soilAmp * this.liqFactor;
+
+    // Wave components: freq(Hz), amplitude weight, phase
+    this.waves = [
+      { f: 0.8 + rand(-0.2, 0.2),  w: 1.0,  p: rand(0, Math.PI * 2) },
+      { f: 1.6 + rand(-0.3, 0.3),  w: 0.7,  p: rand(0, Math.PI * 2) },
+      { f: 3.2 + rand(-0.5, 0.5),  w: 0.35, p: rand(0, Math.PI * 2) },
+      { f: 5.5 + rand(-0.8, 0.8),  w: 0.15, p: rand(0, Math.PI * 2) },
+      { f: 0.3 + rand(-0.05,0.05), w: 0.5,  p: rand(0, Math.PI * 2) },
+    ];
+
+    // Vertical component waves (weaker)
+    this.vWaves = [
+      { f: 1.2 + rand(-0.2, 0.2), w: 0.4, p: rand(0, Math.PI * 2) },
+      { f: 2.8 + rand(-0.4, 0.4), w: 0.2, p: rand(0, Math.PI * 2) },
+    ];
+
+    this.noiseState = 0;
+    this.noiseTarget = 0;
+    this.noiseTimer = 0;
+    this.peakPGA = 0;
+    this.currentPGA = 0;
+  }
+
+  // Trapezoidal envelope: ramp up → sustain → decay
+  envelope(t) {
+    const rUp = this.dur * 0.08;
+    const rDown = this.dur * 0.25;
+    const tDecay = this.dur - rDown;
+    if (t < rUp) return t / rUp;
+    if (t > tDecay) return Math.max(0, 1 - (t - tDecay) / rDown);
+    return 1.0;
+  }
+
+  // Stochastic noise (low-freq random walk)
+  noise(dt) {
+    this.noiseTimer -= dt;
+    if (this.noiseTimer <= 0) {
+      this.noiseTarget = rand(-1, 1);
+      this.noiseTimer = rand(0.05, 0.15);
+    }
+    this.noiseState = lerp(this.noiseState, this.noiseTarget, dt * 12);
+    return this.noiseState;
+  }
+
+  // Get ground acceleration at time t
+  getAccel(t, dt) {
+    if (t < 0 || t > this.dur) return { ax: 0, ay: 0 };
+    const env = this.envelope(t);
+    const n = this.noise(dt);
+
+    let ax = 0;
+    for (const w of this.waves) {
+      ax += w.w * Math.sin(2 * Math.PI * w.f * t + w.p);
+    }
+    ax = (ax / 2.2 + n * 0.3) * env * this.basePGA * CONFIG.GRAVITY;
+
+    let ay = 0;
+    for (const w of this.vWaves) {
+      ay += w.w * Math.sin(2 * Math.PI * w.f * t + w.p);
+    }
+    ay = (ay / 1.5) * env * this.basePGA * CONFIG.GRAVITY * 0.35;
+
+    this.currentPGA = Math.abs(ax) / CONFIG.GRAVITY;
+    if (this.currentPGA > this.peakPGA) this.peakPGA = this.currentPGA;
+
+    return { ax, ay };
+  }
+}
+
+// ============================================================
+//  STRUCTURAL MEMBER
+//  Individual beam/column/wall with damage tracking
+// ============================================================
+class StructuralMember {
+  constructor(type, x, y, w, h, floor) {
+    this.type = type;       // 'column','beam','wall'
+    this.x = x; this.y = y;
+    this.w = w; this.h = h;
+    this.floor = floor;
+    this.damage = 0;        // 0..1
+    this.damageLevel = 0;   // 0=none,1=minor,2=moderate,3=severe,4=failed
+    this.broken = false;
+    this.opacity = 1;
+    this.cracks = [];
+    this.maxCracks = CONFIG.CRACK_DENSITY;
+    this.fallVel = 0;
+    this.fallOffset = 0;
+    this.tilt = 0;
+  }
+
+  applyDamage(amount) {
+    if (this.broken) return;
+    this.damage = clamp(this.damage + amount, 0, 1);
+    const prev = this.damageLevel;
+    if (this.damage > 0.9) this.damageLevel = 4;
+    else if (this.damage > 0.65) this.damageLevel = 3;
+    else if (this.damage > 0.35) this.damageLevel = 2;
+    else if (this.damage > 0.1) this.damageLevel = 1;
+    else this.damageLevel = 0;
+
+    // Generate cracks on damage increase
+    if (this.damageLevel > prev && this.cracks.length < this.maxCracks) {
+      const numNew = randInt(1, 3);
+      for (let i = 0; i < numNew; i++) {
+        this.cracks.push({
+          x1: rand(0.1, 0.9), y1: rand(0.1, 0.9),
+          x2: rand(0.1, 0.9), y2: rand(0.1, 0.9),
+          w: rand(0.5, 1.5 + this.damage * 2),
+          opacity: rand(0.4, 0.9)
+        });
+      }
+    }
+
+    if (this.damageLevel >= 4 && !this.broken) {
+      this.broken = true;
+    }
+  }
+}
+
+// ============================================================
+//  BUILDING MODEL
+//  Discrete structural model with floors, columns, beams, walls
+// ============================================================
+class BuildingModel {
+  constructor(numFloors, structType, hasShearWall, buildingAge) {
+    this.numFloors = numFloors;
+    this.structType = structType;
+    this.hasShearWall = hasShearWall;
+    this.age = buildingAge;
+    this.members = [];
+    this.floors = [];       // per-floor data
+    this.collapsed = false;
+    this.collapseFloor = -1;
+
+    // Ductility & age degradation
+    this.ductility = CONFIG.DUCTILITY[structType] || 1.0;
+    this.ageDeg = 1 + CONFIG.AGE_FACTOR * buildingAge;
+    this.wallBonus = hasShearWall ? CONFIG.SHEAR_WALL_BONUS : 1.0;
+
+    // Effective resistance multiplier
+    this.resistance = (this.ductility * this.wallBonus) / this.ageDeg;
+
+    this._build();
+  }
+
+  _build() {
+    const fh = CONFIG.FLOOR_H;
+    const bw = CONFIG.BAY_W;
+    const nb = CONFIG.NUM_BAYS;
+    const cw = CONFIG.COL_W;
+    const bh = CONFIG.BEAM_H;
+    const wt = CONFIG.WALL_T;
+
+    for (let f = 0; f < this.numFloors; f++) {
+      const floorData = {
+        index: f,
+        drift: 0,
+        maxDrift: 0,
+        displacement: 0,
+        velocity: 0,
+        health: 1,
+        collapsed: false,
+        collapseProgress: 0,
+        tilt: 0,
+        members: []
+      };
+
+      const yBase = f * fh;
+
+      // Columns (numBays + 1)
+      for (let b = 0; b <= nb; b++) {
+        const col = new StructuralMember(
+          'column',
+          b * bw, yBase,
+          cw, fh,
+          f
+        );
+        this.members.push(col);
+        floorData.members.push(col);
+      }
+
+      // Beams at top of floor
+      for (let b = 0; b < nb; b++) {
+        const beam = new StructuralMember(
+          'beam',
+          b * bw + cw / 2, yBase + fh - bh,
+          bw - cw, bh,
+          f
+        );
+        this.members.push(beam);
+        floorData.members.push(beam);
+      }
+
+      // Shear walls (if present, place in first and last bay)
+      if (this.hasShearWall) {
+        for (const bay of [0, nb - 1]) {
+          const wall = new StructuralMember(
+            'wall',
+            bay * bw + cw, yBase,
+            bw - 2 * cw, fh,
+            f
+          );
+          this.members.push(wall);
+          floorData.members.push(wall);
+        }
+      }
+
+      this.floors.push(floorData);
+    }
+  }
+
+  getTotalWidth() {
+    return CONFIG.NUM_BAYS * CONFIG.BAY_W;
+  }
+
+  getTotalHeight() {
+    return this.numFloors * CONFIG.FLOOR_H;
+  }
+
+  getOverallHealth() {
+    if (this.floors.length === 0) return 1;
+    let sum = 0;
+    for (const f of this.floors) sum += f.health;
+    return sum / this.floors.length;
+  }
+}
+
+// ============================================================
+//  PHYSICS ENGINE
+//  Multi-DOF mass-spring + inter-story drift + progressive collapse
+// ============================================================
+class PhysicsEngine {
+  constructor(building, earthquake) {
+    this.bldg = building;
+    this.eq = earthquake;
+    this.time = 0;
+    this.finished = false;
+    this.maxDrift = 0;
+    this.maxPGA = 0;
+    this.baseShear = 0;
+    this.collapseEvents = [];
+
+    // Per-floor dynamic state
+    this.floorMass = [];
+    this.floorStiffness = [];
+    for (let f = 0; f < building.numFloors; f++) {
+      // Mass increases with height (tributary area concept)
+      const m = 50000 + rand(-5000, 5000); // kg per floor
+      this.floorMass.push(m);
+
+      // Stiffness depends on structure type and shear wall
+      let k = 8e6 * building.resistance;
+      // Lower floors stiffer
+      k *= (1 + 0.05 * (building.numFloors - f));
+      this.floorStiffness.push(k);
+    }
+  }
+
+  step(dt) {
+    if (this.finished) return;
+
+    this.time += dt;
+    if (this.time > this.eq.dur + 2) {
+      this.finished = true;
+      return;
+    }
+
+    const { ax, ay } = this.eq.getAccel(this.time, dt);
+    this.maxPGA = Math.max(this.maxPGA, Math.abs(ax) / CONFIG.GRAVITY);
+
+    const nf = this.bldg.numFloors;
+    const floors = this.bldg.floors;
+    const dampRatio = CONFIG.DAMPING;
+
+    // Ground displacement (integrate accel roughly)
+    const groundDisp = ax * 0.01;
+
+    // Update each floor (SDOF chain from bottom up)
+    let totalBaseShear = 0;
+
+    for (let f = 0; f < nf; f++) {
+      const fl = floors[f];
+      if (fl.collapsed && fl.collapseProgress >= 1) continue;
+
+      const m = this.floorMass[f];
+      let k = this.floorStiffness[f];
+
+      // Degrade stiffness with damage
+      k *= Math.max(0.05, fl.health);
+
+      // Reference displacement (floor below or ground)
+      const refDisp = f === 0 ? groundDisp : floors[f - 1].displacement;
+
+      // Relative displacement
+      const relDisp = fl.displacement - refDisp;
+
+      // Spring force
+      const springF = -k * relDisp;
+
+      // Damping force
+      const omega = Math.sqrt(k / m);
+      const dampF = -2 * dampRatio * omega * m * fl.velocity;
+
+      // Seismic inertia force
+      const seismicF = -m * ax;
+
+      // Total force
+      const totalF = springF + dampF + seismicF;
+
+      // Acceleration, velocity, displacement (Newmark-ish explicit)
+      const accel = totalF / m;
+      fl.velocity += accel * dt;
+      fl.velocity *= 0.999; // tiny numerical damping
+      fl.displacement += fl.velocity * dt;
+
+      // Inter-story drift ratio
+      const storyH = CONFIG.FLOOR_H;
+      fl.drift = Math.abs(fl.displacement - refDisp) / storyH;
+      if (fl.drift > fl.maxDrift) fl.maxDrift = fl.drift;
+      if (fl.drift > this.maxDrift) this.maxDrift = fl.drift;
+
+      // Base shear contribution
+      if (f === 0) totalBaseShear += Math.abs(springF);
+
+      // ─── DAMAGE CALCULATION ───
+      const driftThresholds = this._getDriftThresholds();
+      let dmgRate = 0;
+
+      if (fl.drift > driftThresholds.collapse) {
+        dmgRate = 0.08;
+      } else if (fl.drift > driftThresholds.severe) {
+        dmgRate = 0.025;
+      } else if (fl.drift > driftThresholds.moderate) {
+        dmgRate = 0.006;
+      } else if (fl.drift > driftThresholds.minor) {
+        dmgRate = 0.001;
+      }
+
+      // Apply damage to floor members
+      if (dmgRate > 0) {
+        const memberDmg = dmgRate * dt * (1 / this.bldg.resistance);
+        for (const mem of fl.members) {
+          // Columns take more damage than beams
+          let factor = 1.0;
+          if (mem.type === 'column') factor = 1.3;
+          if (mem.type === 'wall') factor = 0.5;
+          if (mem.type === 'beam') factor = 0.9;
+          mem.applyDamage(memberDmg * factor);
+        }
+      }
+
+      // Floor health = average member health
+      let healthSum = 0;
+      let cnt = 0;
+      for (const mem of fl.members) {
+        healthSum += (1 - mem.damage);
+        cnt++;
+      }
+      fl.health = cnt > 0 ? healthSum / cnt : 0;
+
+      // ─── COLLAPSE CHECK ───
+      if (!fl.collapsed && fl.health < 0.15) {
+        fl.collapsed = true;
+        fl.collapseProgress = 0;
+        this.bldg.collapsed = true;
+        if (this.bldg.collapseFloor < 0) this.bldg.collapseFloor = f;
+        this.collapseEvents.push({ floor: f, time: this.time });
+      }
+
+      // Animate collapse
+      if (fl.collapsed && fl.collapseProgress < 1) {
+        fl.collapseProgress = clamp(fl.collapseProgress + dt * 0.8, 0, 1);
+        fl.tilt += (rand(-0.02, 0.02)) * dt;
+      }
+    }
+
+    // ─── PROGRESSIVE COLLAPSE ───
+    // If a lower floor collapses, floors above get extra damage
+    for (let f = 0; f < nf; f++) {
+      if (floors[f].collapsed) {
+        for (let above = f + 1; above < nf; above++) {
+          if (!floors[above].collapsed) {
+            const impactDmg = 0.04 * dt;
+            for (const mem of floors[above].members) {
+              mem.applyDamage(impactDmg);
+            }
+          }
+        }
+      }
+    }
+
+    this.baseShear = totalBaseShear;
+  }
+
+  _getDriftThresholds() {
+    const r = this.bldg.resistance;
+    return {
+      minor:    CONFIG.DRIFT_MINOR * r,
+      moderate: CONFIG.DRIFT_MOD * r,
+      severe:   CONFIG.DRIFT_SEVERE * r,
+      collapse: CONFIG.DRIFT_COLLAPSE * r
+    };
+  }
+
+  getAnalysis() {
+    const bldg = this.bldg;
+    const maxD = this.maxDrift;
+    const factors = [];
+    let severity = 'safe';
+
+    // Determine severity
+    const thresh = this._getDriftThresholds();
+    if (bldg.collapsed || maxD > thresh.collapse) {
+      severity = 'collapse';
+    } else if (maxD > thresh.severe) {
+      severity = 'severe';
+    } else if (maxD > thresh.moderate) {
+      severity = 'moderate';
+    }
+
+    // Factor analysis
+    if (this.eq.mag >= 7.0) {
+      factors.push(t('factor_high_magnitude', { mag: this.eq.mag.toFixed(1), pga: this.maxPGA.toFixed(2) }));
+    } else if (this.eq.mag >= 5.5) {
+      factors.push(t('factor_moderate_magnitude', { mag: this.eq.mag.toFixed(1), pga: this.maxPGA.toFixed(2) }));
+    }
+
+    if (bldg.ductility < 0.7) {
+      factors.push(t('factor_low_ductility', { type: bldg.structType }));
+    } else if (bldg.ductility >= 1.3) {
+      factors.push(t('factor_high_ductility', { type: bldg.structType }));
+    }
+
+    if (!bldg.hasShearWall) {
+      factors.push(t('factor_no_shear'));
+    } else {
+      factors.push(t('factor_with_shear'));
+    }
+
+    if (bldg.age > 40) {
+      factors.push(t('factor_age', {
+        age: bldg.age,
+        percent: (CONFIG.AGE_FACTOR * bldg.age * 100).toFixed(0)
+      }));
+    }
+
+    const soilKey = document.getElementById('soilType').value;
+    if (CONFIG.SOIL_AMP[soilKey] > 1.2) {
+      factors.push(t('factor_soft_soil', {
+        percent: ((CONFIG.SOIL_AMP[soilKey] - 1) * 100).toFixed(0)
+      }));
+    }
+
+    const liqKey = document.getElementById('liquefaction').value;
+    if (liqKey === 'high') {
+      factors.push(t('factor_liq_high'));
+    }
+
+    factors.push(t('factor_max_drift', {
+      drift: (maxD * 100).toFixed(2),
+      threshold: (thresh.collapse * 100).toFixed(2)
+    }));
+
+    const collapsedFloors = bldg.floors.filter(f => f.collapsed).length;
+    if (collapsedFloors > 0) {
+      factors.push(t('factor_collapsed_floors', {
+        count: collapsedFloors,
+        total: bldg.numFloors
+      }));
+    }
+
+    return { severity, factors, maxDrift: maxD, peakPGA: this.maxPGA };
+  }
+}
+
+// ============================================================
+//  DEBRIS SYSTEM
+//  Particles with gravity, rotation, bounce, and fade
+// ============================================================
+class DebrisSystem {
+  constructor() {
+    this.particles = [];
+  }
+
+  emit(x, y, count, intensity) {
+    const n = Math.min(count, CONFIG.DEBRIS_MAX - this.particles.length);
+    for (let i = 0; i < n; i++) {
+      this.particles.push({
+        x, y,
+        vx: rand(-120, 120) * intensity,
+        vy: rand(-200, -30) * intensity,
+        w: rand(2, 8),
+        h: rand(2, 6),
+        rot: rand(0, Math.PI * 2),
+        rotV: rand(-8, 8),
+        color: pick(CONFIG.CLR.debris),
+        life: 1,
+        decay: rand(0.15, 0.4),
+        bounced: false,
+        groundY: y + rand(20, 80)
+      });
+    }
+  }
+
+  update(dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.vy += CONFIG.GRAVITY * 60 * dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.rot += p.rotV * dt;
+
+      // Ground bounce
+      if (p.y >= p.groundY && !p.bounced) {
+        p.vy *= -0.3;
+        p.vx *= 0.5;
+        p.bounced = true;
+        p.y = p.groundY;
+      }
+      if (p.bounced) {
+        p.life -= p.decay * dt * 2;
+        p.vx *= 0.95;
+      } else {
+        p.life -= p.decay * dt;
+      }
+
+      if (p.life <= 0) {
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    for (const p of this.particles) {
+      ctx.globalAlpha = clamp(p.life, 0, 1);
+      ctx.fillStyle = p.color;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    ctx.restore();
+  }
+
+  clear() { this.particles = []; }
+}
+
+// ============================================================
+//  DUST SYSTEM
+//  Soft, billowing dust clouds on collapse
+// ============================================================
+class DustSystem {
+  constructor() {
+    this.particles = [];
+  }
+
+  emit(x, y, count) {
+    const n = Math.min(count, CONFIG.DUST_MAX - this.particles.length);
+    for (let i = 0; i < n; i++) {
+      this.particles.push({
+        x: x + rand(-30, 30),
+        y: y + rand(-10, 10),
+        vx: rand(-50, 50),
+        vy: rand(-40, 5),
+        r: rand(15, 55),
+        life: 1,
+        decay: rand(0.08, 0.22),
+        alpha: rand(0.08, 0.2)
+      });
+    }
+  }
+
+  update(dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vx *= 0.98;
+      p.vy -= 8 * dt; // dust rises
+      p.r += 12 * dt; // expands
+      p.life -= p.decay * dt;
+      if (p.life <= 0) this.particles.splice(i, 1);
+    }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    for (const p of this.particles) {
+      const a = p.alpha * clamp(p.life, 0, 1);
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      grad.addColorStop(0, CONFIG.CLR.dust + (a * 0.7) + ')');
+      grad.addColorStop(0.6, CONFIG.CLR.dust + (a * 0.3) + ')');
+      grad.addColorStop(1, CONFIG.CLR.dust + '0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  clear() { this.particles = []; }
+}
+
+// ============================================================
+//  CAMERA SHAKE SYSTEM
+//  Intensity-based cinematic camera shake
+// ============================================================
+class CameraShake {
+  constructor() {
+    this.offsetX = 0;
+    this.offsetY = 0;
+    this.trauma = 0;
+    this.seed = rand(0, 1000);
+  }
+
+  addTrauma(amount) {
+    this.trauma = clamp(this.trauma + amount, 0, 1);
+  }
+
+  update(dt, pga) {
+    // PGA drives continuous trauma
+    this.trauma = clamp(pga * 1.5, 0, 1);
+
+    const shake = this.trauma * this.trauma; // quadratic for feel
+    const t = performance.now() * 0.001;
+
+    // Perlin-ish noise via layered sin
+    this.offsetX = shake * 18 * (
+      Math.sin(t * 25.3 + this.seed) * 0.6 +
+      Math.sin(t * 42.7 + this.seed * 1.3) * 0.3 +
+      Math.sin(t * 67.1 + this.seed * 0.7) * 0.1
+    );
+    this.offsetY = shake * 12 * (
+      Math.sin(t * 31.1 + this.seed + 50) * 0.6 +
+      Math.sin(t * 53.3 + this.seed * 1.1 + 50) * 0.3 +
+      Math.sin(t * 71.9 + this.seed * 0.9 + 50) * 0.1
+    );
+
+    // Decay when earthquake stops
+    this.trauma *= (1 - 3 * dt);
+    if (this.trauma < 0.001) this.trauma = 0;
+  }
+}
+
+// ============================================================
+//  SPARK / FIRE SYSTEM (for severe damage)
+// ============================================================
+class SparkSystem {
+  constructor() {
+    this.particles = [];
+  }
+
+  emit(x, y, count) {
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x, y,
+        vx: rand(-60, 60),
+        vy: rand(-100, -20),
+        life: 1,
+        decay: rand(0.8, 2.5),
+        size: rand(1, 3),
+        color: pick(['#ff6b35','#fbbf24','#ef4444','#ff8c42','#fff'])
+      });
+    }
+  }
+
+  update(dt) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.vy += 80 * dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.life -= p.decay * dt;
+      if (p.life <= 0) this.particles.splice(i, 1);
+    }
+  }
+
+  draw(ctx) {
+    ctx.save();
+    for (const p of this.particles) {
+      ctx.globalAlpha = clamp(p.life, 0, 1);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  clear() { this.particles = []; }
+}
+
+// ▼▼▼ PART 3 STARTS HERE ▼▼▼
+// ============================================================
+//  PART 3: RENDERER + APP CONTROLLER + UI WIRING
+// ============================================================
+
+// ============================================================
+//  GROUND MODEL — Layered terrain with deformation
+// ============================================================
+class GroundModel {
+  constructor(canvasW, canvasH) {
+    this.w = canvasW;
+    this.h = canvasH;
+    this.surfaceY = canvasH * 0.72;
+    this.deformations = [];
+    this.cracks = [];
+  }
+
+  addDeformation(x, depth, width) {
+    this.deformations.push({ x, depth, width, progress: 0 });
+  }
+
+  addCrack(x) {
+    if (this.cracks.length > 30) return;
+    this.cracks.push({
+      x,
+      len: rand(20, 80),
+      angle: rand(-0.4, 0.4),
+      w: rand(0.5, 2.5),
+      branches: Math.random() > 0.5 ? [{
+        at: rand(0.3, 0.7),
+        angle: rand(-0.8, 0.8),
+        len: rand(10, 30)
+      }] : []
+    });
+  }
+
+  update(dt, pga) {
+    for (const d of this.deformations) {
+      d.progress = clamp(d.progress + dt * 0.5, 0, 1);
+    }
+    if (pga > 0.15 && Math.random() < pga * 0.3) {
+      this.addCrack(rand(0, this.w));
+    }
+  }
+
+  draw(ctx, shakeX) {
+    const sy = this.surfaceY;
+
+    // Deep earth layers
+    const layers = [
+      { y: sy,       h: 30,  color: '#4a3728' },
+      { y: sy + 30,  h: 40,  color: '#3d2b1e' },
+      { y: sy + 70,  h: 60,  color: '#2e1f14' },
+      { y: sy + 130, h: 200, color: '#1a120b' },
+    ];
+
+    for (const l of layers) {
+      ctx.fillStyle = l.color;
+      ctx.fillRect(0, l.y, this.w, l.h + 5);
+    }
+
+    // Surface grass/soil texture line
+    const grad = ctx.createLinearGradient(0, sy - 4, 0, sy + 6);
+    grad.addColorStop(0, '#5a7a3a');
+    grad.addColorStop(0.5, '#4a6630');
+    grad.addColorStop(1, '#4a3728');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, sy - 4, this.w, 10);
+
+    // Ground deformations (sinking)
+    for (const d of this.deformations) {
+      const dd = d.depth * d.progress;
+      ctx.fillStyle = '#2e1f14';
+      ctx.beginPath();
+      ctx.ellipse(d.x, sy + 2, d.width / 2, dd, 0, 0, Math.PI);
+      ctx.fill();
+    }
+
+    // Ground cracks
+    ctx.save();
+    ctx.strokeStyle = '#1a0a00';
+    ctx.lineCap = 'round';
+    for (const c of this.cracks) {
+      ctx.lineWidth = c.w;
+      ctx.beginPath();
+      ctx.moveTo(c.x, sy);
+      const ex = c.x + Math.sin(c.angle) * c.len;
+      const ey = sy + Math.cos(c.angle) * c.len;
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+
+      for (const b of c.branches) {
+        const bx = lerp(c.x, ex, b.at);
+        const by = lerp(sy, ey, b.at);
+        ctx.lineWidth = c.w * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(bx, by);
+        ctx.lineTo(
+          bx + Math.sin(b.angle) * b.len,
+          by + Math.cos(b.angle) * b.len * 0.6
+        );
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+}
+
+
+// ============================================================
+//  CINEMATIC RENDERER
+//  Draws everything: sky, ground, building, FX, HUD
+// ============================================================
+class CinematicRenderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.timeAccum = 0;
+
+    // Background city silhouette (parallax)
+    this.bgBuildings = [];
+    for (let i = 0; i < 35; i++) {
+      this.bgBuildings.push({
+        x: rand(-50, canvas.width + 50),
+        w: rand(25, 70),
+        h: rand(40, 200),
+        shade: rand(0.03, 0.1)
+      });
+    }
+    this.bgBuildings.sort((a, b) => a.h - b.h);
+  }
+
+  resize(w, h) {
+    this.canvas.width = w;
+    this.canvas.height = h;
+  }
+
+  // ─── SKY ───
+  drawSky(groundY, intensity) {
+    const ctx = this.ctx;
+    const w = this.canvas.width;
+
+    // Gradient sky
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+    const r = Math.floor(lerp(8, 45, intensity));
+    const g = Math.floor(lerp(12, 15, intensity));
+    const b = Math.floor(lerp(30, 12, intensity));
+    skyGrad.addColorStop(0, `rgb(${r},${g},${b})`);
+    skyGrad.addColorStop(0.6, `rgb(${r+10},${g+5},${b+15})`);
+    skyGrad.addColorStop(1, `rgb(${r+20},${g+12},${b+20})`);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, groundY);
+
+    // Stars (dim when shaking)
+    if (intensity < 0.3) {
+      ctx.fillStyle = `rgba(255,255,255,${0.6 - intensity})`;
+      const seed = 42;
+      for (let i = 0; i < 60; i++) {
+        const sx = ((seed * (i + 1) * 73) % w);
+        const sy = ((seed * (i + 1) * 37) % (groundY * 0.7));
+        const sr = 0.5 + (i % 3) * 0.4;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Moon
+    const moonX = w * 0.82;
+    const moonY = groundY * 0.18;
+    const moonGlow = ctx.createRadialGradient(moonX, moonY, 5, moonX, moonY, 60);
+    moonGlow.addColorStop(0, 'rgba(255,250,230,0.25)');
+    moonGlow.addColorStop(0.5, 'rgba(255,250,230,0.05)');
+    moonGlow.addColorStop(1, 'rgba(255,250,230,0)');
+    ctx.fillStyle = moonGlow;
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, 60, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f0e8d0';
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, 10, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // ─── BACKGROUND CITYSCAPE ───
+  drawCityscape(groundY, shakeX) {
+    const ctx = this.ctx;
+    for (const b of this.bgBuildings) {
+      const alpha = b.shade;
+      ctx.fillStyle = `rgba(20,18,30,${alpha + 0.15})`;
+      const bx = b.x + shakeX * 0.15; // parallax
+      ctx.fillRect(bx, groundY - b.h, b.w, b.h);
+
+      // Tiny windows
+      ctx.fillStyle = `rgba(255,230,150,${alpha * 1.2})`;
+      for (let wy = groundY - b.h + 8; wy < groundY - 5; wy += 14) {
+        for (let wx = bx + 5; wx < bx + b.w - 5; wx += 10) {
+          if (Math.random() > 0.35) {
+            ctx.fillRect(wx, wy, 4, 6);
+          }
+        }
+      }
+    }
+  }
+
+  // ─── MAIN BUILDING ───
+  drawBuilding(building, physics, originX, originY, shakeX, scale) {
+    const ctx = this.ctx;
+    const floors = building.floors;
+    const fh = CONFIG.FLOOR_H;
+    const bw = CONFIG.BAY_W;
+    const nb = CONFIG.NUM_BAYS;
+    const totalW = building.getTotalWidth();
+    const totalWPx = totalW * scale;
+
+    ctx.save();
+    ctx.translate(originX + shakeX, originY);
+
+    for (let f = 0; f < building.numFloors; f++) {
+      const fl = floors[f];
+      const baseY = -((f + 1) * fh * scale);
+      const disp = fl.displacement * 3 * scale; // visual amplification
+
+      // Collapse animation
+      let collapseOffY = 0;
+      let collapseRot = 0;
+      if (fl.collapsed) {
+        collapseOffY = fl.collapseProgress * fh * scale * 0.8;
+        collapseRot = fl.tilt * fl.collapseProgress * 0.5;
+      }
+
+      ctx.save();
+      ctx.translate(disp, collapseOffY);
+      if (collapseRot) {
+        ctx.translate(totalWPx / 2, baseY + (fh * scale) / 2);
+        ctx.rotate(collapseRot);
+        ctx.translate(-totalWPx / 2, -(baseY + (fh * scale) / 2));
+      }
+
+      // Draw members of this floor
+      for (const mem of fl.members) {
+        this._drawMember(ctx, mem, baseY, fl.health, fl.collapsed, fl.collapseProgress, scale);
+      }
+
+      // Floor slab (top line)
+      ctx.fillStyle = this._getHealthColor(fl.health, 0.9);
+      ctx.fillRect(0, baseY, totalWPx, 3);
+
+      // Floor number label
+      ctx.fillStyle = `rgba(255,255,255,${fl.collapsed ? 0.2 : 0.5})`;
+      ctx.font = '10px monospace';
+      ctx.fillText(`${t('floor_prefix')}${f + 1}`, totalWPx + 8, baseY + (fh * scale) / 2 + 3);
+
+      ctx.restore();
+    }
+
+    // Foundation
+    ctx.fillStyle = '#5a5a6a';
+    ctx.fillRect(-10, 0, totalWPx + 20, 8);
+    ctx.fillStyle = '#4a4a58';
+    ctx.fillRect(-15, 8, totalWPx + 30, 5);
+
+    ctx.restore();
+  }
+
+  _drawMember(ctx, mem, floorBaseY, floorHealth, isCollapsed, collapseP, scale) {
+    const alpha = isCollapsed ? Math.max(0.15, 1 - collapseP) : 1;
+
+    if (mem.type === 'column') {
+      const x = mem.x * scale;
+      const y = floorBaseY;
+      const w = mem.w * scale;
+      const h = mem.h * scale;
+
+      // Column body
+      const dmgColor = this._getDamageColor(mem.damage);
+      ctx.fillStyle = dmgColor;
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(x - w / 2, y, w, h);
+
+      // Damage overlay (darkening)
+      if (mem.damage > 0.1) {
+        ctx.fillStyle = `rgba(80,20,0,${mem.damage * 0.5})`;
+        ctx.fillRect(x - w / 2, y, w, h);
+      }
+
+      // Cracks
+      this._drawCracks(ctx, mem, x - w / 2, y, w, h);
+      ctx.globalAlpha = 1;
+
+    } else if (mem.type === 'beam') {
+      const x = mem.x * scale;
+      const y = floorBaseY + (CONFIG.FLOOR_H - mem.h) * scale;
+      const w = mem.w * scale;
+      const h = mem.h * scale;
+
+      ctx.fillStyle = this._getDamageColor(mem.damage);
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(x, y, w, h);
+
+      if (mem.damage > 0.2) {
+        ctx.fillStyle = `rgba(80,20,0,${mem.damage * 0.4})`;
+        ctx.fillRect(x, y, w, h);
+      }
+
+      this._drawCracks(ctx, mem, x, y, w, h);
+      ctx.globalAlpha = 1;
+
+    } else if (mem.type === 'wall') {
+      const x = mem.x * scale;
+      const y = floorBaseY;
+      const w = mem.w * scale;
+      const h = mem.h * scale;
+
+      // Semi-transparent wall fill
+      ctx.fillStyle = `rgba(100,110,130,${0.35 * (1 - mem.damage * 0.5)})`;
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(x, y, w, h);
+
+      // Wall border
+      ctx.strokeStyle = `rgba(140,150,170,${0.5 * (1 - mem.damage)})`;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, w, h);
+
+      // Cross pattern for shear wall
+      if (mem.damage < 0.7) {
+        ctx.strokeStyle = `rgba(140,150,170,${0.2 * (1 - mem.damage)})`;
+        ctx.beginPath();
+        ctx.moveTo(x, y); ctx.lineTo(x + w, y + h);
+        ctx.moveTo(x + w, y); ctx.lineTo(x, y + h);
+        ctx.stroke();
+      }
+
+      this._drawCracks(ctx, mem, x, y, w, h);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  _drawCracks(ctx, mem, rx, ry, rw, rh) {
+    if (mem.cracks.length === 0) return;
+    ctx.strokeStyle = '#1a0500';
+    ctx.lineCap = 'round';
+    for (const c of mem.cracks) {
+      ctx.lineWidth = c.w;
+      ctx.globalAlpha = c.opacity * (1 - (mem.broken ? 0.4 : 0));
+      ctx.beginPath();
+      ctx.moveTo(rx + c.x1 * rw, ry + c.y1 * rh);
+      ctx.lineTo(rx + c.x2 * rw, ry + c.y2 * rh);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  _getDamageColor(damage) {
+    if (damage < 0.15) return CONFIG.CLR.concrete;
+    if (damage < 0.4)  return CONFIG.CLR.damaged1;
+    if (damage < 0.7)  return CONFIG.CLR.damaged2;
+    return CONFIG.CLR.damaged3;
+  }
+
+  _getHealthColor(health, alpha) {
+    const r = Math.floor(lerp(200, 120, health));
+    const g = Math.floor(lerp(50, 130, health));
+    const b = Math.floor(lerp(50, 140, health));
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  // ─── HUD OVERLAY ───
+  drawHUD(time, pga, maxDrift, health, severity, eqDuration) {
+    const ctx = this.ctx;
+    const w = this.canvas.width;
+    const pad = 15;
+
+    // Top-left: time & phase
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath();
+    this._roundRect(ctx, pad, pad, 250, 70, 8);
+    ctx.fill();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 13px "Courier New", monospace';
+    ctx.fillText(`${t('time_prefix')}: ${time.toFixed(2)}s / ${eqDuration.toFixed(1)}s`, pad + 10, pad + 22);
+
+    const phase = time < eqDuration ? t('phase_active') : t('phase_post');
+    ctx.fillStyle = time < eqDuration ? '#ff4444' : '#44ff88';
+    ctx.fillText(`◉ ${phase}`, pad + 10, pad + 42);
+
+    // PGA bar
+    ctx.fillStyle = '#555';
+    ctx.fillRect(pad + 10, pad + 52, 230, 6);
+    const pgaNorm = clamp(pga / 1.5, 0, 1);
+    const pgaGrad = ctx.createLinearGradient(pad + 10, 0, pad + 240, 0);
+    pgaGrad.addColorStop(0, '#22c55e');
+    pgaGrad.addColorStop(0.5, '#eab308');
+    pgaGrad.addColorStop(1, '#ef4444');
+    ctx.fillStyle = pgaGrad;
+    ctx.fillRect(pad + 10, pad + 52, 230 * pgaNorm, 6);
+
+    ctx.restore();
+
+    // Top-right: severity badge
+    ctx.save();
+    const sevColors = {
+      safe: '#22c55e', moderate: '#eab308', severe: '#f97316', collapse: '#ef4444'
+    };
+    const sevColor = sevColors[severity] || '#888';
+    ctx.fillStyle = sevColor;
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    this._roundRect(ctx, w - 170 - pad, pad, 170, 34, 8);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(t(`severity_${severity}`).toUpperCase(), w - 85 - pad, pad + 23);
+    ctx.textAlign = 'left';
+    ctx.restore();
+
+    // Cinematic bars (top & bottom)
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, CONFIG.CINE_BAR);
+    ctx.fillRect(0, this.canvas.height - CONFIG.CINE_BAR, w, CONFIG.CINE_BAR);
+  }
+
+  _roundRect(ctx, x, y, w, h, r) {
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  // ─── SEISMOGRAPH MINI-CHART ───
+  drawSeismograph(history, x, y, w, h) {
+    const ctx = this.ctx;
+
+    // Background
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath();
+    this._roundRect(ctx, x, y, w, h, 6);
+    ctx.fill();
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 0.5;
+    for (let gy = y + 10; gy < y + h; gy += 15) {
+      ctx.beginPath();
+      ctx.moveTo(x + 5, gy);
+      ctx.lineTo(x + w - 5, gy);
+      ctx.stroke();
+    }
+
+    // Waveform
+    if (history.length < 2) return;
+    ctx.strokeStyle = '#00ff88';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = '#00ff88';
+    ctx.shadowBlur = 4;
+    ctx.beginPath();
+
+    const mid = y + h / 2;
+    const maxA = 0.8;
+    const step = (w - 10) / Math.min(history.length, 300);
+
+    const start = Math.max(0, history.length - 300);
+    for (let i = start; i < history.length; i++) {
+      const px = x + 5 + (i - start) * step;
+      const py = mid - (history[i] / maxA) * (h / 2 - 10);
+      if (i === start) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Label
+    ctx.fillStyle = '#aaa';
+    ctx.font = '9px monospace';
+    ctx.fillText('SEISMOGRAPH', x + 8, y + 12);
+  }
+
+  clear() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+}
+
+
+// ============================================================
+//  MAIN APPLICATION CONTROLLER
+//  Orchestrates everything: init, run simulation, animate
+// ============================================================
+class SimulatorApp {
+  constructor() {
+    this.canvas = document.getElementById('simCanvas');
+    this.ctx = this.canvas.getContext('2d');
+
+    this.renderer = new CinematicRenderer(this.canvas);
+    this.camera = new CameraShake();
+    this.debris = new DebrisSystem();
+    this.dust = new DustSystem();
+    this.sparks = new SparkSystem();
+
+    this.building = null;
+    this.earthquake = null;
+    this.physics = null;
+    this.ground = null;
+
+    this.running = false;
+    this.paused = false;
+    this.speed = 1;
+    this.lastTime = 0;
+    this.accelHistory = [];
+    this.analysisShown = false;
+
+    // Debris emission cooldown
+    this.debrisCooldown = 0;
+
+    this._setupCanvas();
+    this._bindEvents();
+    this._drawIdle();
+  }
+
+  _setupCanvas() {
+    const container = this.canvas.parentElement;
+    const resize = () => {
+      const rect = container.getBoundingClientRect();
+      this.canvas.width = rect.width;
+      this.canvas.height = rect.height;
+      this.renderer.resize(rect.width, rect.height);
+      if (!this.running) this._drawIdle();
+    };
+    window.addEventListener('resize', resize);
+    resize();
+  }
+
+  _bindEvents() {
+    // Start button
+    document.getElementById('startBtn').addEventListener('click', () => this.start());
+
+    // Pause button
+    document.getElementById('pauseBtn').addEventListener('click', () => {
+      if (!this.running) return;
+      this.paused = !this.paused;
+      const btn = document.getElementById('pauseBtn');
+      btn.textContent = this.paused ? t('resume_btn') : t('pause_btn');
+      btn.classList.toggle('paused', this.paused);
+      if (!this.paused) requestAnimationFrame(t => this._loop(t));
+    });
+
+    // Reset button
+    document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+
+    // Speed control
+    document.getElementById('simSpeed').addEventListener('input', (e) => {
+      this.speed = parseFloat(e.target.value);
+      document.getElementById('speedVal').textContent = this.speed.toFixed(1) + 'x';
+    });
+  }
+
+  _readInputs() {
+    const shearWallValue = document.getElementById('shearWall').value;
+    return {
+      floors: parseInt(document.getElementById('numFloors').value) || 5,
+      structType: document.getElementById('structureType').value,
+      shearWall: shearWallValue === 'yes' || shearWallValue === '1',
+      age: parseInt(document.getElementById('buildingAge').value) || 10,
+      magnitude: parseFloat(document.getElementById('magnitude').value) || 6.5,
+      depth: parseFloat(document.getElementById('depth').value) || 15,
+      duration: parseFloat(document.getElementById('duration').value) || 15,
+      soilType: document.getElementById('soilType').value,
+      liquefaction: document.getElementById('liquefaction').value,
+    };
+  }
+
+  start() {
+    const p = this._readInputs();
+
+    this.building = new BuildingModel(p.floors, p.structType, p.shearWall, p.age);
+    this.earthquake = new EarthquakeModel(p.magnitude, p.duration, p.depth, p.soilType, p.liquefaction);
+    this.physics = new PhysicsEngine(this.building, this.earthquake);
+    this.ground = new GroundModel(this.canvas.width, this.canvas.height);
+
+    this.debris.clear();
+    this.dust.clear();
+    this.sparks.clear();
+    this.accelHistory = [];
+    this.analysisShown = false;
+    this.paused = false;
+    this.running = true;
+    this.lastTime = 0;
+
+    document.getElementById('pauseBtn').textContent = t('pause_btn');
+    document.getElementById('pauseBtn').classList.remove('paused');
+
+    // Update status
+    this._setStatus('status_running', '#ff4444');
+
+    requestAnimationFrame(t => this._loop(t));
+  }
+
+  reset() {
+    this.running = false;
+    this.paused = false;
+    this.building = null;
+    this.physics = null;
+    this.earthquake = null;
+    this.debris.clear();
+    this.dust.clear();
+    this.sparks.clear();
+    this.accelHistory = [];
+
+    document.getElementById('pauseBtn').textContent = t('pause_btn');
+    document.getElementById('analysisBox').style.display = 'none';
+    document.getElementById('analysisBox').classList.remove('visible');
+    document.getElementById('analysisPlaceholder').style.display = 'block';
+    this._setStatus('status_idle', '#888');
+    this._resetMonitors();
+    this._drawIdle();
+  }
+
+  _loop(timestamp) {
+    if (!this.running || this.paused) return;
+
+    if (this.lastTime === 0) this.lastTime = timestamp;
+    let rawDt = (timestamp - this.lastTime) / 1000;
+    this.lastTime = timestamp;
+
+    // Clamp dt to avoid spiral of death
+    rawDt = Math.min(rawDt, 0.05);
+    const dt = rawDt * this.speed;
+
+    // Physics sub-steps for stability
+    const subSteps = Math.max(1, Math.ceil(dt / 0.004));
+    const subDt = dt / subSteps;
+    for (let s = 0; s < subSteps; s++) {
+      this.physics.step(subDt);
+    }
+
+    // Update FX systems
+    const pga = this.earthquake.currentPGA;
+    this.camera.update(rawDt, pga);
+    this.ground.update(dt, pga);
+    this.debris.update(dt);
+    this.dust.update(dt);
+    this.sparks.update(dt);
+    this.accelHistory.push(this.earthquake.currentPGA * (Math.random() > 0.5 ? 1 : -1));
+
+    // Emit debris & dust from damaged floors
+    this.debrisCooldown -= dt;
+    if (this.debrisCooldown <= 0) {
+      this.debrisCooldown = 0.08;
+      this._emitFX();
+    }
+
+    // ─── RENDER ───
+    this._render();
+
+    // ─── UPDATE MONITORS ───
+    this._updateMonitors();
+
+    // ─── CHECK FINISHED ───
+    if (this.physics.finished && !this.analysisShown) {
+      this.analysisShown = true;
+      this._showAnalysis();
+      this._setStatus('status_complete', '#22c55e');
+    }
+
+    requestAnimationFrame(t => this._loop(t));
+  }
+
+  _emitFX() {
+    if (!this.building) return;
+    const renderScale = this._getRenderScale();
+    const visualWidth = this.building.getTotalWidth() * renderScale;
+    const originX = this.canvas.width * 0.5 - visualWidth / 2;
+    const groundY = this.ground.surfaceY;
+
+    for (const fl of this.building.floors) {
+      if (fl.health < 0.7 && fl.health > 0.05) {
+        const flY = groundY - (fl.index + 1) * CONFIG.FLOOR_H * renderScale;
+        const flX = originX + visualWidth * Math.random();
+        const intensity = 1 - fl.health;
+
+        if (Math.random() < intensity * 0.5) {
+          this.debris.emit(flX, flY, randInt(1, 4), intensity);
+        }
+
+        if (fl.collapsed && fl.collapseProgress < 0.8) {
+          this.dust.emit(flX, groundY - 10, randInt(2, 6));
+          if (Math.random() < 0.3) {
+            this.sparks.emit(flX, flY, randInt(1, 3));
+          }
+        }
+      }
+    }
+
+    // Ground deformations during collapse
+    if (this.building.collapsed && Math.random() < 0.1) {
+      this.ground.addDeformation(
+        originX + rand(0, visualWidth),
+        rand(3, 10), rand(20, 50)
+      );
+    }
+  }
+
+  _render() {
+    const ctx = this.ctx;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    const cam = this.camera;
+    const groundY = this.ground ? this.ground.surfaceY : h * 0.72;
+    const pga = this.earthquake ? this.earthquake.currentPGA : 0;
+
+    this.renderer.clear();
+
+    ctx.save();
+    ctx.translate(cam.offsetX, cam.offsetY);
+
+    // Sky
+    this.renderer.drawSky(groundY, clamp(pga * 2, 0, 1));
+
+    // Background city
+    this.renderer.drawCityscape(groundY, cam.offsetX);
+
+    // Ground
+    if (this.ground) this.ground.draw(ctx, cam.offsetX);
+
+    // Building
+    if (this.building) {
+      const renderScale = this._getRenderScale();
+      const bldgW = this.building.getTotalWidth() * renderScale;
+      const originX = w * 0.5 - bldgW / 2;
+      this.renderer.drawBuilding(
+        this.building, this.physics,
+        originX, groundY, 0, renderScale
+      );
+    }
+
+    // Particle FX
+    this.debris.draw(ctx);
+    this.dust.draw(ctx);
+    this.sparks.draw(ctx);
+
+    ctx.restore();
+
+    // HUD (not affected by camera shake)
+    const severity = this.physics ? this.physics.getAnalysis().severity : 'safe';
+    this.renderer.drawHUD(
+      this.physics ? this.physics.time : 0,
+      pga,
+      this.physics ? this.physics.maxDrift : 0,
+      this.building ? this.building.getOverallHealth() : 1,
+      severity,
+      this.earthquake ? this.earthquake.dur : 0
+    );
+
+    // Seismograph
+    this.renderer.drawSeismograph(
+      this.accelHistory,
+      15, h - CONFIG.CINE_BAR - 90, 210, 70
+    );
+
+    // Screen flash on high PGA
+    if (pga > 0.5) {
+      ctx.fillStyle = `rgba(255,100,50,${(pga - 0.5) * 0.15})`;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // Vignette
+    const vigGrad = ctx.createRadialGradient(w/2, h/2, w*0.25, w/2, h/2, w*0.75);
+    vigGrad.addColorStop(0, 'rgba(0,0,0,0)');
+    vigGrad.addColorStop(1, 'rgba(0,0,0,0.45)');
+    ctx.fillStyle = vigGrad;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  _drawIdle() {
+    const ctx = this.ctx;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+
+    // Dark background
+    ctx.fillStyle = '#0a0e1a';
+    ctx.fillRect(0, 0, w, h);
+
+    // Cinematic bars
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, CONFIG.CINE_BAR);
+    ctx.fillRect(0, h - CONFIG.CINE_BAR, w, CONFIG.CINE_BAR);
+
+    // Center text
+    ctx.fillStyle = '#334';
+    ctx.font = `bold ${Math.min(w * 0.04, 28)}px "Courier New", monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(t('idle_title'), w / 2, h / 2 - 15);
+    ctx.font = `${Math.min(w * 0.025, 16)}px sans-serif`;
+    ctx.fillStyle = '#445';
+    ctx.fillText(t('idle_hint'), w / 2, h / 2 + 15);
+    ctx.textAlign = 'left';
+
+    // Vignette
+    const vig = ctx.createRadialGradient(w/2, h/2, w*0.2, w/2, h/2, w*0.7);
+    vig.addColorStop(0, 'rgba(0,0,0,0)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  _getRenderScale() {
+    if (!this.building) return CONFIG.PPM;
+    const groundY = this.ground ? this.ground.surfaceY : this.canvas.height * 0.72;
+    const availableHeight = Math.max(120, groundY - 54);
+    return Math.min(CONFIG.PPM, Math.max(3, availableHeight / this.building.getTotalHeight()));
+  }
+
+  // ─── MONITOR PANEL UPDATES ───
+  _updateMonitors() {
+    if (!this.physics) return;
+    const p = this.physics;
+    const b = this.building;
+    const eq = this.earthquake;
+
+    const fmt2 = v => v.toFixed(2);
+    const fmt3 = v => v.toFixed(3);
+    const pct  = v => (v * 100).toFixed(1) + '%';
+
+    document.getElementById('monTime').textContent = fmt2(p.time) + 's';
+    document.getElementById('monPGA').textContent = fmt3(eq.currentPGA) + 'g';
+    document.getElementById('monPeakPGA').textContent = fmt3(eq.peakPGA) + 'g';
+    document.getElementById('monDrift').textContent = pct(p.maxDrift);
+    document.getElementById('healthPercent').textContent = pct(b.getOverallHealth());
+    document.getElementById('monBaseShear').textContent = (p.baseShear / 1000).toFixed(1) + ' kN';
+    document.getElementById('ovPGA').textContent = fmt3(eq.currentPGA) + 'g';
+    document.getElementById('ovDrift').textContent = pct(p.maxDrift);
+    document.getElementById('simTimeDisplay').textContent = `${t('time_prefix')}: ${fmt2(p.time)}s`;
+
+    // Health bar color
+    const hb = document.getElementById('healthBar');
+    const hp = b.getOverallHealth();
+    hb.style.width = (hp * 100) + '%';
+    hb.style.background = hp > 0.6 ? '#22c55e' : hp > 0.3 ? '#eab308' : '#ef4444';
+
+    // Per-floor status
+    const flContainer = document.getElementById('floorBars');
+    if (flContainer.children.length !== b.numFloors) {
+      flContainer.innerHTML = '';
+      for (let f = b.numFloors - 1; f >= 0; f--) {
+        const div = document.createElement('div');
+        div.className = 'floor-indicator';
+        div.id = `fi-${f}`;
+        div.innerHTML = `<span>${t('floor_prefix')}${f+1}</span><span class="fi-health"></span>`;
+        flContainer.appendChild(div);
+      }
+    }
+    for (let f = 0; f < b.numFloors; f++) {
+      const fi = document.getElementById(`fi-${f}`);
+      if (!fi) continue;
+      const fl = b.floors[f];
+      const hpEl = fi.querySelector('.fi-health');
+      hpEl.textContent = fl.collapsed ? t('collapsed').toUpperCase() : pct(fl.health);
+      fi.style.borderLeft = fl.collapsed
+        ? '3px solid #ef4444'
+        : `3px solid ${fl.health > 0.6 ? '#22c55e' : fl.health > 0.3 ? '#eab308' : '#f97316'}`;
+      if (fl.collapsed) fi.classList.add('collapsed');
+    }
+  }
+
+  _resetMonitors() {
+    document.getElementById('monTime').textContent = '0.00s';
+    document.getElementById('monPGA').textContent = '0.000g';
+    document.getElementById('monPeakPGA').textContent = '0.000g';
+    document.getElementById('monDrift').textContent = '0.0%';
+    document.getElementById('healthPercent').textContent = '100.0%';
+    document.getElementById('monBaseShear').textContent = '0.0 kN';
+    document.getElementById('ovPGA').textContent = '0.000g';
+    document.getElementById('ovDrift').textContent = '0.0%';
+    document.getElementById('simTimeDisplay').textContent = `${t('time_prefix')}: 0.00s`;
+    document.getElementById('healthBar').style.width = '100%';
+    document.getElementById('healthBar').style.background = '#22c55e';
+    document.getElementById('floorBars').innerHTML = '';
+  }
+
+  _setStatus(textKey, color) {
+    const el = document.getElementById('statusBadge');
+    el.dataset.statusKey = textKey;
+    el.textContent = t(textKey);
+    el.style.color = color;
+  }
+
+  refreshLocalizedUi() {
+    const statusEl = document.getElementById('statusBadge');
+    statusEl.textContent = t(statusEl.dataset.statusKey || 'status_ready');
+    document.getElementById('startBtn').textContent = t('start_btn');
+    document.getElementById('resetBtn').textContent = t('reset_btn');
+    document.getElementById('pauseBtn').textContent = this.paused ? t('resume_btn') : t('pause_btn');
+
+    if (!this.running) {
+      this._drawIdle();
+      this._resetMonitors();
+    } else {
+      this._updateMonitors();
+    }
+
+    if (this.analysisShown) this._showAnalysis();
+  }
+
+  // ─── ANALYSIS DISPLAY ───
+  _showAnalysis() {
+    if (!this.physics) return;
+    const result = this.physics.getAnalysis();
+    const panel = document.getElementById('analysisBox');
+
+    let html = `<div class="analysis-severity ${result.severity}">
+      <span class="sev-badge">${t(`severity_${result.severity}`).toUpperCase()}</span>
+    </div>
+    <div class="analysis-stats">
+      <div class="stat-item">
+        <span class="stat-label">${t('peak_pga_label')}</span>
+        <span class="stat-value">${result.peakPGA.toFixed(3)}g</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">${t('max_drift_label')}</span>
+        <span class="stat-value">${(result.maxDrift * 100).toFixed(2)}%</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label">${t('floors_collapsed_label')}</span>
+        <span class="stat-value">${this.building.floors.filter(f=>f.collapsed).length} / ${this.building.numFloors}</span>
+      </div>
+    </div>
+    <h4>${t('contributing_factors')}:</h4>
+    <ul class="analysis-factors">`;
+
+    for (const f of result.factors) {
+      html += `<li>${f}</li>`;
+    }
+    html += '</ul>';
+
+    panel.innerHTML = html;
+    panel.style.display = 'block';
+    panel.classList.add('visible');
+    document.getElementById('analysisPlaceholder').style.display = 'none';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// ============================================================
+//  BOOTSTRAP — Start when DOM is ready
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadStoredTheme();
+  applyTranslations();
+  window.simulator = new SimulatorApp();
+  window.simulator._setStatus('status_ready', '#22c55e');
+  document.addEventListener('click', (event) => {
+    const panel = document.getElementById('settingsPanel');
+    const settingsBtn = document.querySelector('.sim-settings-btn');
+    if (!panel.contains(event.target) && !settingsBtn.contains(event.target)) {
+      panel.classList.remove('open');
+    }
+  });
+});
+
+      </script>
+  </body>
+</html>
